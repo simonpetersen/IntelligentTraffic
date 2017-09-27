@@ -2,39 +2,22 @@ package model;
 
 public class RoadTO {
 
-    private int id, startNode, stopNode, length, speedLimit, zipCode;
+    private int length, speedLimit, zipCode;
+    private long id;
 
-    public RoadTO(int id, int startNode, int stopNode, int length, int speedLimit, int zipCode) {
+    public RoadTO(long id, int length, int speedLimit, int zipCode) {
         this.id = id;
-        this.startNode = startNode;
-        this.stopNode = stopNode;
         this.length = length;
         this.speedLimit = speedLimit;
         this.zipCode = zipCode;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
-    }
-
-    public int getStartNode() {
-        return startNode;
-    }
-
-    public void setStartNode(int startNode) {
-        this.startNode = startNode;
-    }
-
-    public int getStopNode() {
-        return stopNode;
-    }
-
-    public void setStopNode(int stopNode) {
-        this.stopNode = stopNode;
     }
 
     public int getLength() {

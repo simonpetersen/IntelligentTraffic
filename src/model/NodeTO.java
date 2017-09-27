@@ -1,23 +1,25 @@
 package model;
 
+import java.math.BigDecimal;
+
 public class NodeTO {
 
-    private int id;
+    private long id;
     private String type;
     private double latitude, longitude;
 
-    public NodeTO(int id, String type, double latitude, double longitude) {
+    public NodeTO(long id, String type, double latitude, double longitude) {
         this.id = id;
         this.type = type;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
