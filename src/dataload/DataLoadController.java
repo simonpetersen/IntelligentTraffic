@@ -43,24 +43,18 @@ public class DataLoadController {
         }
     }
 
-    public void loadData() {
+    public void loadData() throws Exception {
         Document document = loadDocument();
         NodeList nodeList = document.getFirstChild().getChildNodes();
 
         loadObjects(nodeList);
     }
 
-    private Document loadDocument() {
-        Document document = null;
-
-        try {
-            File fXmlFile = new File(filePath);
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dBuilder = dbFactory.newDocumentBuilder();
-            document = dBuilder.parse(fXmlFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private Document loadDocument() throws Exception {
+        File fXmlFile = new File(filePath);
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        Document document = dBuilder.parse(fXmlFile);
 
         return document;
     }
