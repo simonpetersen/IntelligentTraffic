@@ -6,6 +6,7 @@ import dao.RoadNodesDao;
 import dao.impl.NodeDaoImpl;
 import dao.impl.RoadDaoImpl;
 import dao.impl.RoadNodesDaoImpl;
+import integration.YrWeatherDataConnector;
 import model.Node;
 import model.Route;
 
@@ -18,12 +19,14 @@ public class RouteCalculationController {
     private NodeDao nodeDao;
     private RoadNodesDao roadNodesDao;
     private RoadDao roadDao;
+    private YrWeatherDataConnector yrWeatherDataConnector;
 
     public RouteCalculationController() {
         try {
             this.nodeDao = new NodeDaoImpl();
             this.roadNodesDao = new RoadNodesDaoImpl();
             this.roadDao = new RoadDaoImpl();
+            this.yrWeatherDataConnector = new YrWeatherDataConnector();
         } catch (Exception e) {
             e.printStackTrace();
         }
