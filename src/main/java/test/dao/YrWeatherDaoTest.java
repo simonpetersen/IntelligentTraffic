@@ -39,6 +39,6 @@ public class YrWeatherDaoTest {
         assertEquals(expected, actual);
 
         // Delete test row
-        yrWeatherDao.deleteWeatherData(cachedWeatherData);
+        //yrWeatherDao.deleteWeatherData(cachedWeatherData);
     }
 }
