@@ -3,10 +3,12 @@ package dao.impl;
 import dao.ConnectionFactory;
 import dao.UserDao;
 import model.dto.UserTO;
+import util.KeyGenerator;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 public class UserDaoImpl implements UserDao {
 
@@ -20,8 +22,24 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void createUser(UserTO user) {
+    public void createUser(UserTO user) throws Exception {
+        createUserStmt.setString(1, user.getUsername());
+        createUserStmt.setString(2, user.getPassword());
+        createUserStmt.setString(4, user.getName());
+        createUserStmt.setBoolean(5, user.isAdmin());
 
+        String key = KeyGenerator.generateApiKey();
+        createUserStmt.setString(3, key);
+
+        try {
+            createUserStmt.executeUpdate();
+        } catch (SQLIntegrityConstraintViolationException e) {
+            // Creation failed because of non-unique api key. Retry with new key.
+            String newKey = KeyGenerator.generateApiKey();
+            System.out.println(newKey);
+            createUserStmt.setString(3, newKey);
+            createUserStmt.executeUpdate();
+        }
     }
 
     @Override
@@ -36,14 +54,16 @@ public class UserDaoImpl implements UserDao {
             String name = resultSet.getString("name");
             boolean admin = resultSet.getBoolean("admin");
 
-            return new UserTO(username, password, apiKey, name, admin);
+            return new UserTO(username, null, apiKey, name, admin);
         }
 
         return null;
     }
 
     @Override
-    public void deleteUser(String username) {
+    public void deleteUser(String username) throws Exception {
+        deleteUserStmt.setString(1, username);
 
+        deleteUserStmt.executeUpdate();
     }
 }
