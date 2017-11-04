@@ -51,21 +51,17 @@ public class UserDaoTest {
     }
 
     @Test
-    public void testCreateUser() throws Exception {
-        UserTO user = new UserTO("admin2", null, "abcd", "Admin", true);
+    public void testCreateUserWithNonUniqueKey() throws Exception {
         try {
+            UserTO user = new UserTO("test1", null, "abcd", "Test User", false);
             userDao.createUser(user);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
 
-    @Test
-    public void testDeleteUser() throws Exception {
-        String username = "admin2";
-        try {
-            userDao.deleteUser(username);
+            user.setUsername("test2");
+            userDao.createUser(user);
+
+            // Delete rows
+            userDao.deleteUser("test1");
+            userDao.deleteUser("test2");
         } catch (Exception e) {
             e.printStackTrace();
             fail();
