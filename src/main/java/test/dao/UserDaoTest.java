@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class UserDaoTest {
@@ -37,7 +38,7 @@ public class UserDaoTest {
     }
 
     @Test
-    public void testKeyGeneratoin() throws Exception {
+    public void testKeyGeneration() throws Exception {
         List<String> generatedKeys = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             String randomKey = KeyGenerator.generateApiKey();
@@ -51,20 +52,16 @@ public class UserDaoTest {
     }
 
     @Test
-    public void testCreateUserWithNonUniqueKey() throws Exception {
-        try {
-            UserTO user = new UserTO("test1", null, "abcd", "Test User", false);
-            userDao.createUser(user);
+    public void testValidateApiKeyAdmin() throws Exception {
+        String key = "a1414c8b-70d6-4b6e-aabf-1a5877004087";
+        boolean validation = userDao.validateApiKeyAdmin(key);
+        assertTrue(validation);
+    }
 
-            user.setUsername("test2");
-            userDao.createUser(user);
-
-            // Delete rows
-            userDao.deleteUser("test1");
-            userDao.deleteUser("test2");
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+    @Test
+    public void testValidateApiKey() throws Exception {
+        String key = "a1414c8b-70d6-4b6e-aabf-1a5877004087";
+        boolean validation = userDao.validateApiKey(key);
+        assertTrue(validation);
     }
 }
