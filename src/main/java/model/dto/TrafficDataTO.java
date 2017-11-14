@@ -2,14 +2,13 @@ package model.dto;
 
 import java.util.Date;
 
-public class RushHourDataTO {
+public class TrafficDataTO {
 
-    private int id, roadId, distance, congestionLevel;
+    private int id, distance, congestionLevel;
     private Date startTime, endTime;
 
-    public RushHourDataTO(int id, int roadId, int distance, int congestionLevel, Date startTime, Date endTime) {
+    public TrafficDataTO(int id, int distance, int congestionLevel, Date startTime, Date endTime) {
         this.id = id;
-        this.roadId = roadId;
         this.distance = distance;
         this.congestionLevel = congestionLevel;
         this.startTime = startTime;
@@ -22,14 +21,6 @@ public class RushHourDataTO {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public int getRoadId() {
-        return roadId;
-    }
-
-    public void setRoadId(int roadId) {
-        this.roadId = roadId;
     }
 
     public int getDistance() {

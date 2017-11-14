@@ -2,22 +2,22 @@ package model.dto;
 
 public class WeatherTO {
 
-    private int id, zipCode;
+    private int weatherDataId, zipCode;
     private String type, degree;
 
-    public WeatherTO(int id, int zipCode, String type, String degree) {
-        this.id = id;
+    public WeatherTO(int weatherDataId, int zipCode, String type, String degree) {
+        this.weatherDataId = weatherDataId;
         this.zipCode = zipCode;
         this.type = type;
         this.degree = degree;
     }
 
-    public int getId() {
-        return id;
+    public int getWeatherDataId() {
+        return weatherDataId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setWeatherDataId(int weatherDataId) {
+        this.weatherDataId = weatherDataId;
     }
 
     public int getZipCode() {

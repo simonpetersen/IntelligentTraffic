@@ -4,22 +4,22 @@ import java.util.Date;
 
 public class WeatherDataCacheTO {
 
-    private int id;
+    private int yrId;
     private Date date;
     private String xml;
 
-    public WeatherDataCacheTO(int id, Date date, String xml) {
-        this.id = id;
+    public WeatherDataCacheTO(int yrId, Date date, String xml) {
+        this.yrId = yrId;
         this.date = date;
         this.xml = xml;
     }
 
-    public int getId() {
-        return id;
+    public int getYrId() {
+        return yrId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setYrId(int yrId) {
+        this.yrId = yrId;
     }
 
     public Date getDate() {

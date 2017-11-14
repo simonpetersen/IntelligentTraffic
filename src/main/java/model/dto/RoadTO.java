@@ -2,22 +2,21 @@ package model.dto;
 
 public class RoadTO {
 
-    private int length, speedLimit, zipCode;
-    private long id;
+    private int roadId, length, distance, travelTime;
 
-    public RoadTO(long id, int length, int speedLimit, int zipCode) {
-        this.id = id;
+    public RoadTO(int RoadId, int length, int distance, int travelTime) {
+        this.roadId = RoadId;
         this.length = length;
-        this.speedLimit = speedLimit;
-        this.zipCode = zipCode;
+        this.distance = distance;
+        this.travelTime = travelTime;
     }
 
-    public long getId() {
-        return id;
+    public int getRoadId() {
+        return roadId;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setRoadId(int roadId) {
+        this.roadId = roadId;
     }
 
     public int getLength() {
@@ -28,19 +27,19 @@ public class RoadTO {
         this.length = length;
     }
 
-    public int getSpeedLimit() {
-        return speedLimit;
+    public int getDistance() {
+        return distance;
     }
 
-    public void setSpeedLimit(int speedLimit) {
-        this.speedLimit = speedLimit;
+    public void setDistance(int distance) {
+        this.distance = distance;
     }
 
-    public int getZipCode() {
-        return zipCode;
+    public int getTravelTime() {
+        return travelTime;
     }
 
-    public void setZipCode(int zipCode) {
-        this.zipCode = zipCode;
+    public void setTravelTime(int travelTime) {
+        this.travelTime = travelTime;
     }
 }

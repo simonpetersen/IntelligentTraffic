@@ -19,7 +19,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DataLoadController {
 
@@ -28,6 +30,8 @@ public class DataLoadController {
     private RoadNodesDao roadNodesDao;
 
     private String filePath;
+    private Map<Long, Integer> nodeIdMap;
+    private Map<Long, Integer> roadIdMap;
 
     public DataLoadController() {
         try {
@@ -35,12 +39,14 @@ public class DataLoadController {
             nodeDao = new NodeDaoImpl();
             roadDao = new RoadDaoImpl();
             roadNodesDao = new RoadNodesDaoImpl();
+            nodeIdMap = new HashMap<>();
+            roadIdMap = new HashMap<>();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void loadData() throws Exception {
+    public void putMapInDB() throws Exception {
         Document document = loadDocument();
         NodeList nodeList = document.getFirstChild().getChildNodes();
 
@@ -75,9 +81,13 @@ public class DataLoadController {
         Node latNode = namedNodeMap.getNamedItem("lat");
 
         if (idNode != null && lonNode != null && latNode != null) {
-            long id = Long.parseLong(idNode.getNodeValue());
+            long idLong = Long.parseLong(idNode.getNodeValue());
+            if (!nodeIdMap.containsKey(idLong)) {
+                nodeIdMap.put(idLong, nodeIdMap.size() + 1);
+            }
             double latitude = Double.parseDouble(latNode.getNodeValue());
             double longitude = Double.parseDouble(lonNode.getNodeValue());
+            int id = nodeIdMap.get(idLong);
 
             NodeTO nodeTO = new NodeTO(id, null, latitude, longitude);
             nodeDao.insertNode(nodeTO);
@@ -85,14 +95,19 @@ public class DataLoadController {
     }
 
     private void loadRoad(Node node) {
-        RoadTO roadTO = new RoadTO(0L, 0, 0, 0);
+        RoadTO roadTO = new RoadTO(0, 0, 0, 0);
         NodeList childNodes = node.getChildNodes();
         NamedNodeMap namedNodeMap = node.getAttributes();
         Node idNode = namedNodeMap.getNamedItem("id");
 
         if (idNode != null) {
-            long id = Long.parseLong(idNode.getNodeValue());
-            roadTO.setId(id);
+            long idLong = Long.parseLong(idNode.getNodeValue());
+            if (!roadIdMap.containsKey(idLong)) {
+                roadIdMap.put(idLong, roadIdMap.size() + 1);
+            }
+
+            int id = roadIdMap.get(idLong);
+            roadTO.setRoadId(id);
         }
 
         roadDao.insertRoad(roadTO);
@@ -107,9 +122,12 @@ public class DataLoadController {
                     Node refNode = childNodeAttributes.getNamedItem("ref");
                     if (refNode != null) {
                         long ref = Long.parseLong(refNode.getNodeValue());
-                        RoadNodesTO roadNodesTO = new RoadNodesTO(1, roadTO.getId(), ref, sequence);
-                        roadNodes.add(roadNodesTO);
-                        sequence++;
+                        if (nodeIdMap.containsKey(ref)) {
+                            int refId = nodeIdMap.get(ref);
+                            RoadNodesTO roadNodesTO = new RoadNodesTO(0, roadTO.getRoadId(), refId, sequence);
+                            roadNodes.add(roadNodesTO);
+                            sequence++;
+                        }
                     }
                 }
             }

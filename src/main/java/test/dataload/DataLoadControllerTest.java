@@ -13,8 +13,9 @@ public class DataLoadControllerTest {
     public void loadData() {
         try {
             dataLoadController = new DataLoadController();
-            dataLoadController.loadData();
+            dataLoadController.putMapInDB();
         } catch (Exception e) {
+            e.printStackTrace();
             fail();
         }
     }

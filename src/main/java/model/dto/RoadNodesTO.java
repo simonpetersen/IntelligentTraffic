@@ -2,37 +2,36 @@ package model.dto;
 
 public class RoadNodesTO {
 
-    private long id, roadId, nodeId;
-    private int sequence;
+    private int roadNodesId, sequence, nodeId, roadId;
 
-    public RoadNodesTO(long id, long roadId, long nodeId, int sequence) {
-        this.id = id;
+    public RoadNodesTO(int roadNodesId, int roadId, int nodeId, int sequence) {
+        this.roadNodesId = roadNodesId;
         this.roadId = roadId;
         this.nodeId = nodeId;
         this.sequence = sequence;
     }
 
-    public long getId() {
-        return id;
+    public int getRoadNodesId() {
+        return roadNodesId;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setRoadNodesId(int roadNodesId) {
+        this.roadNodesId = roadNodesId;
     }
 
-    public long getRoadId() {
+    public int getRoadId() {
         return roadId;
     }
 
-    public void setRoadId(long roadId) {
+    public void setRoadId(int roadId) {
         this.roadId = roadId;
     }
 
-    public long getNodeId() {
+    public int getNodeId() {
         return nodeId;
     }
 
-    public void setNodeId(long nodeId) {
+    public void setNodeId(int nodeId) {
         this.nodeId = nodeId;
     }
 

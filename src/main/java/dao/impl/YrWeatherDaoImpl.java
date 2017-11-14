@@ -66,7 +66,7 @@ public class YrWeatherDaoImpl implements YrWeatherDao {
     @Override
     public void deleteWeatherData(WeatherDataCacheTO weatherDataCacheTO) {
         try {
-            deletePreparedStmt.setInt(1, weatherDataCacheTO.getId());
+            deletePreparedStmt.setInt(1, weatherDataCacheTO.getYrId());
 
             deletePreparedStmt.executeUpdate();
         } catch (SQLException e) {

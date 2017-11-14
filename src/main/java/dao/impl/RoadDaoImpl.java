@@ -15,17 +15,17 @@ public class RoadDaoImpl implements RoadDao {
 
         // Initialization of prepared statements
         insertPreparedStmt = ConnectionFactory.getConnection()
-                .prepareStatement("INSERT INTO road (id, length, speedLimit, zipCode) VALUES (?,?,?,?)");
+                .prepareStatement("INSERT INTO road (roadid, length, distance, travelTime) VALUES (?,?,?,?)");
     }
 
     @Override
     public void insertRoad(RoadTO roadTO) {
         try {
 
-            insertPreparedStmt.setLong(1, roadTO.getId());
+            insertPreparedStmt.setInt(1, roadTO.getRoadId());
             insertPreparedStmt.setInt(2, roadTO.getLength());
-            insertPreparedStmt.setInt(3, roadTO.getSpeedLimit());
-            insertPreparedStmt.setInt(4, roadTO.getZipCode());
+            insertPreparedStmt.setInt(3, roadTO.getDistance());
+            insertPreparedStmt.setInt(4, roadTO.getTravelTime());
 
             insertPreparedStmt.executeUpdate();
 

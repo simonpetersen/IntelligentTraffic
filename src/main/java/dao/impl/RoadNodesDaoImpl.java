@@ -25,8 +25,8 @@ public class RoadNodesDaoImpl implements RoadNodesDao {
 
             for (RoadNodesTO roadNode : roadNodes) {
 
-                insertListPreparedStmt.setLong(1, roadNode.getRoadId());
-                insertListPreparedStmt.setLong(2, roadNode.getNodeId());
+                insertListPreparedStmt.setInt(1, roadNode.getRoadId());
+                insertListPreparedStmt.setInt(2, roadNode.getNodeId());
                 insertListPreparedStmt.setInt(3, roadNode.getSequence());
 
                 insertListPreparedStmt.executeUpdate();
