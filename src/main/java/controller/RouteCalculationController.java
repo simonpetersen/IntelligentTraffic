@@ -1,14 +1,17 @@
 package controller;
 
+import com.graphhopper.routing.Dijkstra;
+import com.graphhopper.routing.Path;
+import com.graphhopper.routing.util.*;
+import com.graphhopper.routing.weighting.ShortestWeighting;
+import com.graphhopper.storage.GraphHopperStorage;
+import com.graphhopper.util.EdgeIteratorState;
 import dao.NodeDao;
-import dao.RoadDao;
-import dao.RoadNodesDao;
 import dao.impl.NodeDaoImpl;
-import dao.impl.RoadDaoImpl;
-import dao.impl.RoadNodesDaoImpl;
 import integration.YrWeatherDataConnector;
 import model.Node;
 import model.Route;
+import model.dto.NodeTO;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,32 +20,55 @@ import java.util.List;
 public class RouteCalculationController {
 
     private NodeDao nodeDao;
-    private RoadNodesDao roadNodesDao;
-    private RoadDao roadDao;
     private YrWeatherDataConnector yrWeatherDataConnector;
+    private DataController dataController;
 
     public RouteCalculationController() {
         try {
             this.nodeDao = new NodeDaoImpl();
-            this.roadNodesDao = new RoadNodesDaoImpl();
-            this.roadDao = new RoadDaoImpl();
             this.yrWeatherDataConnector = new YrWeatherDataConnector();
+            this.dataController = new DataController();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // TODO: Implement
-    public Route calculateRoute(Node start, Node destination, Date dateTime) {
-        // For testing purposes a simple route is returned
-        return createMockRoute();
+    // TODO: Adjust according to weather by checking weather forecast at dateTime
+    public Route calculateRoute(NodeTO start, NodeTO destination, Date dateTime) {
+        FlagEncoder encoder = new CarFlagEncoder();
+        GraphHopperStorage graph = dataController.loadMapAsGraph(encoder);
+
+        TraversalMode tMode = TraversalMode.NODE_BASED;
+        Dijkstra dijkstra = new Dijkstra(graph, new ShortestWeighting(encoder), tMode);
+
+        Path path = dijkstra.calcPath(start.getNodeId(), destination.getNodeId());
+
+        return mapPathToRoute(path);
     }
 
-    private Route createMockRoute() {
-        List<Node> nodes = new ArrayList<>();
-        nodes.add(new Node(147749, 54.7808636, 11.4887596));
-        nodes.add(new Node(147750, 54.7788018, 11.4809834));
-        nodes.add(new Node(147751, 54.7770637, 11.4743413));
-        return new Route(nodes);
+    private Route mapPathToRoute(Path path) {
+        List<Node> nodeList = new ArrayList<>();
+        List<EdgeIteratorState> edges = path.calcEdges();
+
+        for (int i = 0; i < edges.size(); i++) {
+            int baseId = edges.get(i).getBaseNode();
+            int adjId = edges.get(i).getAdjNode();
+
+            NodeTO baseNodeTO = nodeDao.getNode(baseId);
+            NodeTO adjNodeTO = nodeDao.getNode(adjId);
+
+            Node baseNode = new Node(baseNodeTO.getNodeId(), baseNodeTO.getLatitude(), baseNodeTO.getLongitude());
+            Node adjNode = new Node(adjNodeTO.getNodeId(), adjNodeTO.getLatitude(), adjNodeTO.getLongitude());
+
+            if (!nodeList.contains(baseNode)) {
+                nodeList.add(baseNode);
+            }
+
+            if (!nodeList.contains(adjNode)) {
+                nodeList.add(adjNode);
+            }
+        }
+
+        return new Route(nodeList);
     }
 }

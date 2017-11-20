@@ -2,20 +2,30 @@ package model;
 
 public class Node {
 
-    private long id;
+    private int id;
     private double latitude, longitude;
 
-    public Node(long id, double latitude, double longitude) {
+    public Node(int id, double latitude, double longitude) {
         this.id = id;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public long getId() {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Node node = (Node) o;
+
+        return id == node.id;
+    }
+
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

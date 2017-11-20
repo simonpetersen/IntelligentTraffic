@@ -2,11 +2,10 @@ package model.dto;
 
 public class RoadTO {
 
-    private int roadId, length, distance, travelTime;
+    private int roadId, distance, travelTime;
 
-    public RoadTO(int RoadId, int length, int distance, int travelTime) {
+    public RoadTO(int RoadId, int distance, int travelTime) {
         this.roadId = RoadId;
-        this.length = length;
         this.distance = distance;
         this.travelTime = travelTime;
     }
@@ -17,14 +16,6 @@ public class RoadTO {
 
     public void setRoadId(int roadId) {
         this.roadId = roadId;
-    }
-
-    public int getLength() {
-        return length;
-    }
-
-    public void setLength(int length) {
-        this.length = length;
     }
 
     public int getDistance() {

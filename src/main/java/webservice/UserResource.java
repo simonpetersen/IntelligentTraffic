@@ -1,5 +1,6 @@
 package webservice;
 
+import controller.UserController;
 import dao.UserDao;
 import dao.impl.UserDaoImpl;
 import exception.DALException;
@@ -14,11 +15,11 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @Path("user")
 public class UserResource {
 
-    private UserDao userDao;
+    private UserController userController;
 
     public UserResource() throws WebServiceException {
         try {
-            userDao = new UserDaoImpl();
+            userController = new UserController();
         } catch (Exception e) {
             throw new WebServiceException(e.getMessage());
         }
@@ -30,60 +31,25 @@ public class UserResource {
     public UserTO login(@PathParam("username") String username, @Context HttpHeaders httpHeaders) throws Exception {
         MultivaluedMap<String, String> headers = httpHeaders.getRequestHeaders();
         String password = headers.getFirst("password");
-        if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
-            throw new WebServiceException("Username or password can't be empty");
-        }
 
-        UserTO user = userDao.login(username, password);
-
-        return user;
+        return userController.login(username, password);
     }
 
     @POST
     @Path("{username}")
     public Response createUser(@PathParam("username") String username, @QueryParam("apiKey") String apiKey,
                                @Context HttpHeaders httpHeaders) throws Exception {
-        if (!userDao.validateApiKeyAdmin(apiKey)) {
-            throw new WebServiceException("Authorization error: User is not authorized for this operation.");
-        }
-
         MultivaluedMap<String, String> headers = httpHeaders.getRequestHeaders();
         String password = headers.getFirst("password");
         String name = headers.getFirst("name");
         String adminStr = headers.getFirst("admin");
 
-        if (username != null && password != null && name != null && adminStr != null && !username.isEmpty() &&
-                !password.isEmpty() && !name.isEmpty() && !adminStr.isEmpty()) {
-            boolean isAdmin = Boolean.parseBoolean(adminStr);
-            String generatedKey = KeyGenerator.generateApiKey();
-
-            UserTO user = new UserTO(username, password, generatedKey, name, isAdmin);
-
-            try {
-                userDao.createUser(user);
-            } catch (DALException e) {
-                throw new WebServiceException("Error while creating user: " + e.getMessage());
-            }
-
-            return Response.ok().build();
-        }
-
-        throw new WebServiceException("Invalid data. User creation failed.");
+        return userController.createUser(username, password, name, adminStr, apiKey);
     }
 
     @DELETE
     public Response deleteUser(@FormParam("username") String username, @QueryParam("apiKey") String apiKey) throws Exception {
-        if (!userDao.validateApiKeyAdmin(apiKey)) {
-            throw new WebServiceException("Authorization error: User is not authorized for this operation.");
-        }
-
-        try {
-            userDao.deleteUser(username);
-        } catch (DALException e) {
-            throw new WebServiceException("Error while deleting user: " + e.getMessage());
-        }
-
-        return Response.ok().build();
+        return userController.deleteUser(username, apiKey);
     }
 
 }

@@ -1,5 +1,11 @@
-package dataload;
+package controller;
 
+import com.graphhopper.routing.util.CarFlagEncoder;
+import com.graphhopper.routing.util.EncodingManager;
+import com.graphhopper.routing.util.FlagEncoder;
+import com.graphhopper.storage.Graph;
+import com.graphhopper.storage.GraphBuilder;
+import com.graphhopper.storage.GraphHopperStorage;
 import dao.NodeDao;
 import dao.RoadDao;
 import dao.RoadNodesDao;
@@ -23,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DataLoadController {
+public class DataController {
 
     private NodeDao nodeDao;
     private RoadDao roadDao;
@@ -33,7 +39,7 @@ public class DataLoadController {
     private Map<Long, Integer> nodeIdMap;
     private Map<Long, Integer> roadIdMap;
 
-    public DataLoadController() {
+    public DataController() {
         try {
             filePath = "src/main/resources/map.osm";
             nodeDao = new NodeDaoImpl();
@@ -46,14 +52,54 @@ public class DataLoadController {
         }
     }
 
-    public void putMapInDB() throws Exception {
-        Document document = loadDocument();
-        NodeList nodeList = document.getFirstChild().getChildNodes();
+    public GraphHopperStorage loadMapAsGraph(FlagEncoder encoder) {
+        EncodingManager em = new EncodingManager(encoder);
+        GraphBuilder gb = new GraphBuilder(em).setLocation("graphhopper_folder").setStore(true);
+        GraphHopperStorage graph = gb.load();
 
-        loadObjects(nodeList);
+        if (graph.getBaseGraph().getNodes() > 0) {
+            return graph;
+        }
+
+        graph = gb.create();
+
+        loadNodes(graph);
+        loadRoads(graph);
+
+        graph.flush();
+
+        return graph;
     }
 
-    private Document loadDocument() throws Exception {
+    private void loadNodes(GraphHopperStorage graph) {
+        List<Integer> nodeIds = nodeDao.getAllNodeIds();
+
+        for (int id : nodeIds) {
+            NodeTO node = nodeDao.getNode(id);
+            graph.getNodeAccess().setNode(id, node.getLatitude(), node.getLongitude());
+        }
+    }
+
+    private void loadRoads(GraphHopperStorage graph) {
+        List<Integer> roadIds = roadDao.getAllRoadIds();
+        for (int roadId : roadIds) {
+            List<Integer> roadNodesIds = roadNodesDao.getRoadNodesIds(roadId);
+            for (int i = 0; i < roadNodesIds.size() - 1; i++) {
+                RoadNodesTO startNode = roadNodesDao.getRoadNodes(roadNodesIds.get(i));
+                RoadNodesTO endNode = roadNodesDao.getRoadNodes(roadNodesIds.get(i+1));
+                graph.edge(startNode.getNodeId(), endNode.getNodeId(), 1, true);
+            }
+        }
+    }
+
+    public void saveMapInDB() throws Exception {
+        Document document = loadOsmDocument();
+        NodeList nodeList = document.getFirstChild().getChildNodes();
+
+        persistObjects(nodeList);
+    }
+
+    private Document loadOsmDocument() throws Exception {
         File fXmlFile = new File(filePath);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -62,19 +108,19 @@ public class DataLoadController {
         return document;
     }
 
-    private void loadObjects(NodeList nodeList) {
+    private void persistObjects(NodeList nodeList) {
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
             if (node.getNodeName().equals("node")) {
                 // Persist new Node-object
-                loadNode(node);
+                persistNode(node);
             } else if (node.getNodeName().equals("way")) {
-                loadRoad(node);
+                persistRoad(node);
             }
         }
     }
 
-    private void loadNode(Node node) {
+    private void persistNode(Node node) {
         NamedNodeMap namedNodeMap = node.getAttributes();
         Node idNode = namedNodeMap.getNamedItem("id");
         Node lonNode = namedNodeMap.getNamedItem("lon");
@@ -94,8 +140,8 @@ public class DataLoadController {
         }
     }
 
-    private void loadRoad(Node node) {
-        RoadTO roadTO = new RoadTO(0, 0, 0, 0);
+    private void persistRoad(Node node) {
+        RoadTO roadTO = new RoadTO(0, 0, 0);
         NodeList childNodes = node.getChildNodes();
         NamedNodeMap namedNodeMap = node.getAttributes();
         Node idNode = namedNodeMap.getNamedItem("id");

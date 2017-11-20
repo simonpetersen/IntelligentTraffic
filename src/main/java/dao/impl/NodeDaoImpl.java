@@ -12,7 +12,7 @@ import java.util.List;
 
 public class NodeDaoImpl implements NodeDao {
 
-    private PreparedStatement insertPreparedStmt, getNodeStmt, getAllIdsStmt;
+    private PreparedStatement insertPreparedStmt, getNodeStmt, getAllIdsStmt, getNodeByCoordinatesStmt;
 
     public NodeDaoImpl() throws Exception {
 
@@ -25,6 +25,9 @@ public class NodeDaoImpl implements NodeDao {
 
         getAllIdsStmt = ConnectionFactory.getConnection()
                 .prepareStatement("SELECT NodeId FROM node");
+
+        getNodeByCoordinatesStmt = ConnectionFactory.getConnection()
+                .prepareStatement("SELECT * FROM node WHERE Latitude = ? AND Longitude = ?");
     }
 
     @Override
@@ -76,6 +79,29 @@ public class NodeDaoImpl implements NodeDao {
             }
 
             return nodeIds;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public NodeTO getNodeByCoordinates(double latitude, double longitude) {
+        try {
+            getNodeByCoordinatesStmt.setDouble(1, latitude);
+            getNodeByCoordinatesStmt.setDouble(2, longitude);
+
+            ResultSet resultSet = getNodeByCoordinatesStmt.executeQuery();
+
+            if (resultSet.first()) {
+                int id = resultSet.getInt("NodeId");
+                String type = resultSet.getString("Type");
+                double lat = resultSet.getDouble("Latitude");
+                double lon = resultSet.getDouble("Longitude");
+
+                return new NodeTO(id, type, lat, lon);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

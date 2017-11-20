@@ -5,12 +5,12 @@ public class DbConstants {
     public static final String
 
 			// remote db
-			/*
-			//serve	= "bache17-1.eitlab.diplom.dtu.dk",	//Database serveren
+            /*
+			server	= "bache17-1.eitlab.diplom.dtu.dk",	//Database serveren
 			database = "intelligenttraffic",	            //Database navnet
 			username = "root",				                //Brugernavn
 			password = "PladderballeDiplom2017!";	        //Password
-			*/
+            */
 
 			// local db
 			server	 = "localhost",			    //Database serveren

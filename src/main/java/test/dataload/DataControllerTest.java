@@ -1,19 +1,19 @@
 package test.dataload;
 
-import dataload.DataLoadController;
+import controller.DataController;
 import org.junit.Test;
 
 import static org.junit.Assert.fail;
 
-public class DataLoadControllerTest {
+public class DataControllerTest {
 
-    private DataLoadController dataLoadController;
+    private DataController dataController;
 
     @Test
     public void loadData() {
         try {
-            dataLoadController = new DataLoadController();
-            dataLoadController.putMapInDB();
+            dataController = new DataController();
+            dataController.saveMapInDB();
         } catch (Exception e) {
             e.printStackTrace();
             fail();
