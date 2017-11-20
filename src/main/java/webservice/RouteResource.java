@@ -1,6 +1,7 @@
 package webservice;
 
 import controller.RouteCalculationController;
+import controller.UserController;
 import dao.NodeDao;
 import dao.UserDao;
 import dao.impl.NodeDaoImpl;
@@ -11,33 +12,42 @@ import model.dto.NodeTO;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Path("route")
 public class RouteResource {
 
     private RouteCalculationController routeCalculationController;
-    private UserDao userDao;
+    private UserController userController;
     private NodeDao nodeDao;
+    private DateFormat dateFormat;
 
     public RouteResource() throws Exception {
         routeCalculationController = new RouteCalculationController();
-        userDao = new UserDaoImpl();
+        userController = new UserController();
         nodeDao = new NodeDaoImpl();
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     }
 
     @GET
     @Produces(MediaType.APPLICATION_XML)
-    //@Path("/{startLat}/{startLong}/{destLat}/{destLong}/{date}/")
-    @Path("/{startLat}/{startLong}/{destLat}/{destLong}/")
+    @Path("/{startLat}/{startLong}/{destLat}/{destLong}/{dateString}/")
     public Route getRoute(@PathParam("startLat") double startLatitude, @PathParam("startLong") double startLongitude,
                           @PathParam("destLat") double destinationLatitude, @PathParam("destLong") double destinationLongitude,
-                          @QueryParam("apiKey") String apiKey) throws WebServiceException {
-        if (userDao.validateApiKey(apiKey)) {
+                          @PathParam("dateString") String dateString, @QueryParam("apiKey") String apiKey) throws WebServiceException {
+        if (userController.validateApiKey(apiKey)) {
             NodeTO startNode = nodeDao.getNodeByCoordinates(startLatitude, startLongitude);
             NodeTO destinationNode = nodeDao.getNodeByCoordinates(destinationLatitude, destinationLongitude);
-            Date date = new Date();
-
+            Date date = null;
+            try {
+                date = dateFormat.parse(dateString);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
             return routeCalculationController.calculateRoute(startNode, destinationNode, date);
         }
 

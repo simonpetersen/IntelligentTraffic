@@ -21,6 +21,10 @@ public class UserController {
         }
     }
 
+    public boolean validateApiKey(String apiKey) {
+        return userDao.validateApiKey(apiKey);
+    }
+
     public UserTO login(String username, String password) throws WebServiceException {
         if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
             throw new WebServiceException("Username or password can't be empty.");
