@@ -5,6 +5,7 @@ import dao.UserDao;
 import dao.impl.UserDaoImpl;
 import exception.DALException;
 import exception.WebServiceException;
+import model.User;
 import model.dto.UserTO;
 import util.KeyGenerator;
 
@@ -28,7 +29,7 @@ public class UserResource {
     @POST
     @Path("login/{username}")
     @Produces(MediaType.APPLICATION_XML)
-    public UserTO login(@PathParam("username") String username, @Context HttpHeaders httpHeaders) throws Exception {
+    public User login(@PathParam("username") String username, @Context HttpHeaders httpHeaders) throws Exception {
         MultivaluedMap<String, String> headers = httpHeaders.getRequestHeaders();
         String password = headers.getFirst("password");
 

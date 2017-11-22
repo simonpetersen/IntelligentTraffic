@@ -23,14 +23,16 @@ public class RouteResource {
 
     private RouteCalculationController routeCalculationController;
     private UserController userController;
-    private NodeDao nodeDao;
     private DateFormat dateFormat;
 
-    public RouteResource() throws Exception {
-        routeCalculationController = new RouteCalculationController();
-        userController = new UserController();
-        nodeDao = new NodeDaoImpl();
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    public RouteResource() throws WebServiceException {
+        try {
+            routeCalculationController = new RouteCalculationController();
+            userController = new UserController();
+            dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        } catch (Exception e) {
+            throw new WebServiceException(e.getMessage());
+        }
     }
 
     @GET
@@ -39,16 +41,16 @@ public class RouteResource {
     public Route getRoute(@PathParam("startLat") double startLatitude, @PathParam("startLong") double startLongitude,
                           @PathParam("destLat") double destinationLatitude, @PathParam("destLong") double destinationLongitude,
                           @PathParam("dateString") String dateString, @QueryParam("apiKey") String apiKey) throws WebServiceException {
+        System.out.println("getRoute called with apiKey = " + apiKey);
         if (userController.validateApiKey(apiKey)) {
-            NodeTO startNode = nodeDao.getNodeByCoordinates(startLatitude, startLongitude);
-            NodeTO destinationNode = nodeDao.getNodeByCoordinates(destinationLatitude, destinationLongitude);
             Date date = null;
             try {
                 date = dateFormat.parse(dateString);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            return routeCalculationController.calculateRoute(startNode, destinationNode, date);
+
+            return routeCalculationController.calculateRoute(startLatitude, startLongitude, destinationLatitude, destinationLongitude, date);
         }
 
         throw new WebServiceException("User is not authorized.");

@@ -4,6 +4,7 @@ import dao.UserDao;
 import dao.impl.UserDaoImpl;
 import exception.DALException;
 import exception.WebServiceException;
+import model.User;
 import model.dto.UserTO;
 import util.KeyGenerator;
 
@@ -13,11 +14,11 @@ public class UserController {
 
     private UserDao userDao;
 
-    public UserController() {
+    public UserController() throws Exception {
         try {
             userDao = new UserDaoImpl();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new DALException(e.getMessage());
         }
     }
 
@@ -25,7 +26,7 @@ public class UserController {
         return userDao.validateApiKey(apiKey);
     }
 
-    public UserTO login(String username, String password) throws WebServiceException {
+    public User login(String username, String password) throws WebServiceException {
         if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
             throw new WebServiceException("Username or password can't be empty.");
         }
@@ -41,7 +42,7 @@ public class UserController {
             throw new WebServiceException("Unknown username or password.");
         }
 
-        return user;
+        return new User(user.getUsername(), user.getName(), user.getApiKey(), user.isAdmin());
     }
 
     public Response createUser(String username, String password, String name, String adminStr, String apiKey) throws WebServiceException {

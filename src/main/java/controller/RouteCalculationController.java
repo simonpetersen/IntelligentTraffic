@@ -34,14 +34,21 @@ public class RouteCalculationController {
     }
 
     // TODO: Adjust according to weather by checking weather forecast at dateTime
-    public Route calculateRoute(NodeTO start, NodeTO destination, Date dateTime) {
+    public Route calculateRoute(double startLat, double startLon, double destinationLat, double destinationLon, Date dateTime) {
+        NodeTO startNode = nodeDao.getNodeByCoordinates(startLat, startLon);
+        NodeTO destinationNode = nodeDao.getNodeByCoordinates(destinationLat, destinationLon);
+
+        if (startNode == null || destinationNode == null) {
+            // TODO: Couldn't find nodes. Throw exception.
+        }
+
         FlagEncoder encoder = new CarFlagEncoder();
         GraphHopperStorage graph = dataController.loadMapAsGraph(encoder);
 
         TraversalMode tMode = TraversalMode.NODE_BASED;
         Dijkstra dijkstra = new Dijkstra(graph, new ShortestWeighting(encoder), tMode);
 
-        Path path = dijkstra.calcPath(start.getNodeId(), destination.getNodeId());
+        Path path = dijkstra.calcPath(startNode.getNodeId(), destinationNode.getNodeId());
 
         return mapPathToRoute(path);
     }

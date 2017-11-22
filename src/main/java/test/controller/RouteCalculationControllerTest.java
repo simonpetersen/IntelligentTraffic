@@ -9,6 +9,8 @@ import com.graphhopper.util.InstructionList;
 import com.graphhopper.util.Translation;
 import com.graphhopper.util.TranslationMap;
 import controller.RouteCalculationController;
+import dao.NodeDao;
+import dao.impl.NodeDaoImpl;
 import model.Route;
 import model.dto.NodeTO;
 import org.junit.Before;
@@ -22,17 +24,20 @@ import static org.junit.Assert.assertTrue;
 public class RouteCalculationControllerTest {
 
     private RouteCalculationController routeCalculationController;
+    private NodeDao nodeDao;
 
     @Before
     public void setUp() throws Exception {
         routeCalculationController = new RouteCalculationController();
+        nodeDao = new NodeDaoImpl();
     }
 
     @Test
     public void testCalculateRoute() throws Exception {
-        NodeTO startNode = new NodeTO(1, null, 0, 0);
-        NodeTO destinationNode = new NodeTO(5, null, 0, 0);
-        Route route = routeCalculationController.calculateRoute(startNode, destinationNode, new Date());
+        NodeTO startNode = nodeDao.getNode(1);
+        NodeTO destinationNode = nodeDao.getNode(2);
+        Route route = routeCalculationController.calculateRoute(startNode.getLatitude(), startNode.getLongitude(),
+                destinationNode.getLatitude(), destinationNode.getLongitude(), new Date());
 
         assertNotNull(route);
         assertTrue(!route.getNodes().isEmpty());
