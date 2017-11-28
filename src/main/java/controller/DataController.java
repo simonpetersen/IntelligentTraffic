@@ -37,7 +37,6 @@ public class DataController {
 
     private String filePath;
     private Map<Long, Integer> nodeIdMap;
-    private Map<Long, Integer> roadIdMap;
 
     public DataController() {
         try {
@@ -46,7 +45,6 @@ public class DataController {
             roadDao = new RoadDaoImpl();
             roadNodesDao = new RoadNodesDaoImpl();
             nodeIdMap = new HashMap<>();
-            roadIdMap = new HashMap<>();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -55,13 +53,15 @@ public class DataController {
     public GraphHopperStorage loadMapAsGraph(FlagEncoder encoder) {
         EncodingManager em = new EncodingManager(encoder);
         GraphBuilder gb = new GraphBuilder(em).setLocation("graphhopper_folder").setStore(true);
+        /*
         GraphHopperStorage graph = gb.load();
 
         if (graph.getBaseGraph().getNodes() > 0) {
             return graph;
         }
+        */
 
-        graph = gb.create();
+        GraphHopperStorage graph = gb.create();
 
         loadNodes(graph);
         loadRoads(graph);
@@ -143,18 +143,6 @@ public class DataController {
     private void persistRoad(Node node) {
         RoadTO roadTO = new RoadTO(0, 0, 0);
         NodeList childNodes = node.getChildNodes();
-        NamedNodeMap namedNodeMap = node.getAttributes();
-        Node idNode = namedNodeMap.getNamedItem("id");
-
-        if (idNode != null) {
-            long idLong = Long.parseLong(idNode.getNodeValue());
-            if (!roadIdMap.containsKey(idLong)) {
-                roadIdMap.put(idLong, roadIdMap.size() + 1);
-            }
-
-            int id = roadIdMap.get(idLong);
-            roadTO.setRoadId(id);
-        }
 
         roadDao.insertRoad(roadTO);
 

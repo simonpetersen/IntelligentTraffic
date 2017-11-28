@@ -19,7 +19,7 @@ public class RoadNodesDaoImpl implements RoadNodesDao {
 
         // Initialization of prepared statements
         insertListPreparedStmt = ConnectionFactory.getConnection()
-                .prepareStatement("INSERT INTO roadnodes (road, node, sequence) VALUES (?,?,?)");
+                .prepareStatement("INSERT INTO RoadNodes (road, node, sequence) VALUES (?,?,?)");
 
         getRoadNodesIdsStmt = ConnectionFactory.getConnection()
                 .prepareStatement("SELECT RoadNodesId FROM RoadNodes WHERE Road = ?");

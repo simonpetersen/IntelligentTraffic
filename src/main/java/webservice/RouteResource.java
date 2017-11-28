@@ -1,5 +1,6 @@
 package webservice;
 
+import controller.DataController;
 import controller.RouteCalculationController;
 import controller.UserController;
 import dao.NodeDao;
@@ -24,10 +25,12 @@ public class RouteResource {
     private RouteCalculationController routeCalculationController;
     private UserController userController;
     private DateFormat dateFormat;
+    private DataController dataController;
 
     public RouteResource() throws WebServiceException {
         try {
             routeCalculationController = new RouteCalculationController();
+            dataController = new DataController();
             userController = new UserController();
             dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         } catch (Exception e) {
@@ -54,6 +57,18 @@ public class RouteResource {
         }
 
         throw new WebServiceException("User is not authorized.");
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/initmap/")
+    public String initMap() {
+        try {
+            dataController.saveMapInDB();
+            return "Map initialized.";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 
 }

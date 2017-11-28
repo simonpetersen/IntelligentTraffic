@@ -18,16 +18,16 @@ public class NodeDaoImpl implements NodeDao {
 
         // Initialization of prepared statements
         insertPreparedStmt = ConnectionFactory.getConnection()
-                .prepareStatement("INSERT INTO node (nodeid, type, latitude, longitude) VALUES (?,?,?,?)");
+                .prepareStatement("INSERT INTO Node (nodeid, type, latitude, longitude) VALUES (?,?,?,?)");
 
         getNodeStmt = ConnectionFactory.getConnection()
-                .prepareStatement("SELECT * FROM node WHERE NodeId = ?");
+                .prepareStatement("SELECT * FROM Node WHERE NodeId = ?");
 
         getAllIdsStmt = ConnectionFactory.getConnection()
-                .prepareStatement("SELECT NodeId FROM node");
+                .prepareStatement("SELECT NodeId FROM Node");
 
         getNodeByCoordinatesStmt = ConnectionFactory.getConnection()
-                .prepareStatement("SELECT * FROM node WHERE Latitude = ? AND Longitude = ?");
+                .prepareStatement("SELECT * FROM Node WHERE Latitude = ? AND Longitude = ?");
     }
 
     @Override

@@ -49,7 +49,8 @@ public class UserResource {
     }
 
     @DELETE
-    public Response deleteUser(@FormParam("username") String username, @QueryParam("apiKey") String apiKey) throws Exception {
+    @Path("{username}")
+    public Response deleteUser(@PathParam("username") String username, @QueryParam("apiKey") String apiKey) throws Exception {
         return userController.deleteUser(username, apiKey);
     }
 

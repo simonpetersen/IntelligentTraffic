@@ -19,7 +19,7 @@ public class RoadDaoImpl implements RoadDao {
 
         // Initialization of prepared statements
         insertPreparedStmt = ConnectionFactory.getConnection()
-                .prepareStatement("INSERT INTO road (roadid, distance, travelTime) VALUES (?,?,?)");
+                .prepareStatement("INSERT INTO Road (distance, travelTime) VALUES (?,?)");
 
         getAllIdsStmt = ConnectionFactory.getConnection()
                 .prepareStatement("SELECT roadId FROM Road");
@@ -32,9 +32,8 @@ public class RoadDaoImpl implements RoadDao {
     public void insertRoad(RoadTO roadTO) {
         try {
 
-            insertPreparedStmt.setInt(1, roadTO.getRoadId());
-            insertPreparedStmt.setInt(2, roadTO.getDistance());
-            insertPreparedStmt.setInt(3, roadTO.getTravelTime());
+            insertPreparedStmt.setInt(1, roadTO.getDistance());
+            insertPreparedStmt.setInt(2, roadTO.getTravelTime());
 
             insertPreparedStmt.executeUpdate();
 

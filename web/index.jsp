@@ -11,6 +11,6 @@
     <title>IntelligentTraffic site</title>
   </head>
   <body>
-  <p><a href="/rs/route">Rest Resource</a>
+  <p><a href="/rs/">Rest Resource</a>
   </body>
 </html>
