@@ -20,8 +20,8 @@ public class UserDaoImpl implements UserDao {
                 "VALUES (?,SHA1(?),?,?,?)");
         deleteUserStmt = ConnectionFactory.getConnection().prepareStatement("DELETE FROM User WHERE Username = ?");
         loginStmt = ConnectionFactory.getConnection().prepareStatement("SELECT * FROM User WHERE username = ? AND password = SHA1(?)");
-        validateStmt = ConnectionFactory.getConnection().prepareStatement("SELECT * FROM user WHERE ApiKey = ?");
-        validateAdminStmt = ConnectionFactory.getConnection().prepareStatement("SELECT Admin FROM user WHERE ApiKey = ?");
+        validateStmt = ConnectionFactory.getConnection().prepareStatement("SELECT * FROM User WHERE ApiKey = ?");
+        validateAdminStmt = ConnectionFactory.getConnection().prepareStatement("SELECT Admin FROM User WHERE ApiKey = ?");
     }
 
     @Override
@@ -74,7 +74,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public boolean validateApiKey(String apiKey) {
+    public boolean validateApiKey(String apiKey) throws DALException {
         try {
             validateStmt.setString(1, apiKey);
 
@@ -91,7 +91,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public boolean validateApiKeyAdmin(String apiKey) {
+    public boolean validateApiKeyAdmin(String apiKey) throws DALException {
         try {
             validateAdminStmt.setString(1, apiKey);
 

@@ -2,6 +2,7 @@ package dao.impl;
 
 import dao.ConnectionFactory;
 import dao.NodeDao;
+import exception.DALException;
 import model.dto.NodeTO;
 
 import java.sql.PreparedStatement;
@@ -31,7 +32,7 @@ public class NodeDaoImpl implements NodeDao {
     }
 
     @Override
-    public void insertNode(NodeTO nodeTO) {
+    public void insertNode(NodeTO nodeTO) throws DALException {
         try {
 
             insertPreparedStmt.setInt(1, nodeTO.getNodeId());
@@ -42,13 +43,13 @@ public class NodeDaoImpl implements NodeDao {
             insertPreparedStmt.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException(e);
         }
 
     }
 
     @Override
-    public NodeTO getNode(int nodeId) {
+    public NodeTO getNode(int nodeId) throws DALException {
         try {
             getNodeStmt.setInt(1, nodeId);
 
@@ -60,19 +61,20 @@ public class NodeDaoImpl implements NodeDao {
 
                 return new NodeTO(nodeId, type, latitude, longitude);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        return null;
+            throw new DALException("No node found with NodeId = "+nodeId);
+        } catch (SQLException e) {
+            throw new DALException(e.getMessage());
+        }
     }
 
     @Override
-    public List<Integer> getAllNodeIds() {
+    public List<Integer> getAllNodeIds() throws DALException {
         try {
             ResultSet resultSet = getAllIdsStmt.executeQuery();
 
             List<Integer> nodeIds = new ArrayList<>();
+
             while (resultSet.next()) {
                 int id = resultSet.getInt("nodeid");
                 nodeIds.add(id);
@@ -80,14 +82,12 @@ public class NodeDaoImpl implements NodeDao {
 
             return nodeIds;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException(e.getMessage());
         }
-
-        return null;
     }
 
     @Override
-    public NodeTO getNodeByCoordinates(double latitude, double longitude) {
+    public NodeTO getNodeByCoordinates(double latitude, double longitude) throws DALException {
         try {
             getNodeByCoordinatesStmt.setDouble(1, latitude);
             getNodeByCoordinatesStmt.setDouble(2, longitude);
@@ -102,10 +102,10 @@ public class NodeDaoImpl implements NodeDao {
 
                 return new NodeTO(id, type, lat, lon);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        return null;
+            throw new DALException("No node found with coordinates = " + latitude + ", " + longitude);
+        } catch (SQLException e) {
+            throw new DALException(e.getMessage());
+        }
     }
 }

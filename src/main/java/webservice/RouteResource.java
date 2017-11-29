@@ -44,7 +44,6 @@ public class RouteResource {
     public Route getRoute(@PathParam("startLat") double startLatitude, @PathParam("startLong") double startLongitude,
                           @PathParam("destLat") double destinationLatitude, @PathParam("destLong") double destinationLongitude,
                           @PathParam("dateString") String dateString, @QueryParam("apiKey") String apiKey) throws WebServiceException {
-        System.out.println("getRoute called with apiKey = " + apiKey);
         if (userController.validateApiKey(apiKey)) {
             Date date = null;
             try {
@@ -53,7 +52,11 @@ public class RouteResource {
                 e.printStackTrace();
             }
 
-            return routeCalculationController.calculateRoute(startLatitude, startLongitude, destinationLatitude, destinationLongitude, date);
+            try {
+                return routeCalculationController.calculateRoute(startLatitude, startLongitude, destinationLatitude, destinationLongitude, date);
+            } catch (Exception e) {
+                throw new WebServiceException(e.getMessage());
+            }
         }
 
         throw new WebServiceException("User is not authorized.");

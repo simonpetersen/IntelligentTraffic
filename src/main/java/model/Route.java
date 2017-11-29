@@ -10,20 +10,30 @@ import java.util.List;
 //@XmlAccessorType(XmlAccessType.FIELD)
 public class Route {
 
-    private List<Node> nodes;
+    private List<Node> node;
+    private int duration;
 
     // Empty constructor required for XML-parsing
     public Route() {}
 
-    public Route(List<Node> nodes) {
-        this.nodes = nodes;
+    public Route(List<Node> nodes, int duration) {
+        this.node = nodes;
+        this.duration = duration;
     }
 
-    public List<Node> getNodes() {
-        return nodes;
+    public List<Node> getNode() {
+        return node;
     }
 
-    public void setNodes(List<Node> nodes) {
-        this.nodes = nodes;
+    public void setNode(List<Node> nodes) {
+        this.node = nodes;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 }

@@ -2,6 +2,7 @@ package dao.impl;
 
 import dao.ConnectionFactory;
 import dao.YrWeatherDao;
+import exception.DALException;
 import model.dto.WeatherDataCacheTO;
 
 import java.sql.PreparedStatement;
@@ -32,7 +33,7 @@ public class YrWeatherDaoImpl implements YrWeatherDao {
     }
 
     @Override
-    public WeatherDataCacheTO getNewestCachedData() {
+    public WeatherDataCacheTO getNewestCachedData() throws DALException {
         try {
             ResultSet resultSet = getNewestPreparedStmt.executeQuery();
             if (resultSet.first()) {
@@ -43,15 +44,15 @@ public class YrWeatherDaoImpl implements YrWeatherDao {
 
                 return new WeatherDataCacheTO(id, date, xml);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        return null;
+            throw new DALException("No cachched data found.");
+        } catch (Exception e) {
+            throw new DALException(e.getMessage());
+        }
     }
 
     @Override
-    public void cacheWeatherData(WeatherDataCacheTO weatherDataCacheTO) {
+    public void cacheWeatherData(WeatherDataCacheTO weatherDataCacheTO) throws DALException {
         try {
             String dateTime = simpleDateFormat.format(weatherDataCacheTO.getDate());
             createPreparedStmt.setString(1, dateTime);
@@ -59,18 +60,18 @@ public class YrWeatherDaoImpl implements YrWeatherDao {
 
             createPreparedStmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException(e.getMessage());
         }
     }
 
     @Override
-    public void deleteWeatherData(WeatherDataCacheTO weatherDataCacheTO) {
+    public void deleteWeatherData(WeatherDataCacheTO weatherDataCacheTO) throws DALException {
         try {
             deletePreparedStmt.setInt(1, weatherDataCacheTO.getYrId());
 
             deletePreparedStmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException(e.getMessage());
         }
     }
 }

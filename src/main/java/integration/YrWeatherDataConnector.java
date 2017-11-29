@@ -2,6 +2,7 @@ package integration;
 
 import dao.YrWeatherDao;
 import dao.impl.YrWeatherDaoImpl;
+import exception.DALException;
 import integration.xml.YrWeatherDataXml;
 import model.dto.WeatherDataCacheTO;
 import util.XmlHelper;
@@ -31,7 +32,7 @@ public class YrWeatherDataConnector {
         }
     }
 
-    public YrWeatherDataXml getWeatherData() throws JAXBException {
+    public YrWeatherDataXml getWeatherData() throws Exception {
         WeatherDataCacheTO weatherDataCacheTO = yrWeatherDao.getNewestCachedData();
 
         long cachedTime = new Date().getTime() - weatherDataCacheTO.getDate().getTime();

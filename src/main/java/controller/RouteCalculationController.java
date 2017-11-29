@@ -8,6 +8,7 @@ import com.graphhopper.storage.GraphHopperStorage;
 import com.graphhopper.util.EdgeIteratorState;
 import dao.NodeDao;
 import dao.impl.NodeDaoImpl;
+import exception.DALException;
 import integration.YrWeatherDataConnector;
 import model.Node;
 import model.Route;
@@ -34,12 +35,12 @@ public class RouteCalculationController {
     }
 
     // TODO: Adjust according to weather by checking weather forecast at dateTime
-    public Route calculateRoute(double startLat, double startLon, double destinationLat, double destinationLon, Date dateTime) {
+    public Route calculateRoute(double startLat, double startLon, double destinationLat, double destinationLon, Date dateTime) throws Exception {
         NodeTO startNode = nodeDao.getNodeByCoordinates(startLat, startLon);
         NodeTO destinationNode = nodeDao.getNodeByCoordinates(destinationLat, destinationLon);
 
         if (startNode == null || destinationNode == null) {
-            // TODO: Couldn't find nodes. Throw exception.
+            throw new DALException("Unknown nodes.");
         }
 
         FlagEncoder encoder = new CarFlagEncoder();
@@ -53,13 +54,15 @@ public class RouteCalculationController {
         return mapPathToRoute(path);
     }
 
-    private Route mapPathToRoute(Path path) {
+    private Route mapPathToRoute(Path path) throws DALException {
         List<Node> nodeList = new ArrayList<>();
         List<EdgeIteratorState> edges = path.calcEdges();
+        int duration = 0;
 
         for (int i = 0; i < edges.size(); i++) {
             int baseId = edges.get(i).getBaseNode();
             int adjId = edges.get(i).getAdjNode();
+            duration += edges.get(i).getDistance();
 
             NodeTO baseNodeTO = nodeDao.getNode(baseId);
             NodeTO adjNodeTO = nodeDao.getNode(adjId);
@@ -76,6 +79,6 @@ public class RouteCalculationController {
             }
         }
 
-        return new Route(nodeList);
+        return new Route(nodeList, duration);
     }
 }

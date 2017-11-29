@@ -22,8 +22,12 @@ public class UserController {
         }
     }
 
-    public boolean validateApiKey(String apiKey) {
-        return userDao.validateApiKey(apiKey);
+    public boolean validateApiKey(String apiKey) throws WebServiceException {
+        try {
+            return userDao.validateApiKey(apiKey);
+        } catch (DALException e) {
+            throw new WebServiceException(e.getMessage());
+        }
     }
 
     public User login(String username, String password) throws WebServiceException {
@@ -45,9 +49,13 @@ public class UserController {
         return new User(user.getUsername(), user.getName(), user.getApiKey(), user.isAdmin());
     }
 
-    public Response createUser(String username, String password, String name, String adminStr, String apiKey) throws WebServiceException {
-        if (!userDao.validateApiKeyAdmin(apiKey)) {
-            throw new WebServiceException("Authorization error: User is not authorized for this operation.");
+    public Response createUser(String username, String password, String name, String adminStr, String apiKey) throws WebServiceException  {
+        try {
+            if (!userDao.validateApiKeyAdmin(apiKey)) {
+                throw new WebServiceException("Authorization error: User is not authorized for this operation.");
+            }
+        } catch (DALException e) {
+            throw new WebServiceException(e.getMessage());
         }
 
         if (username != null && password != null && name != null && adminStr != null && !username.isEmpty() &&
@@ -70,8 +78,12 @@ public class UserController {
     }
 
     public Response deleteUser(String username, String apiKey) throws WebServiceException {
-        if (!userDao.validateApiKeyAdmin(apiKey)) {
-            throw new WebServiceException("Authorization error: User is not authorized for this operation.");
+        try {
+            if (!userDao.validateApiKeyAdmin(apiKey)) {
+                throw new WebServiceException("Authorization error: User is not authorized for this operation.");
+            }
+        } catch (DALException e) {
+            throw new WebServiceException(e.getMessage());
         }
 
         try {

@@ -2,6 +2,7 @@ package dao.impl;
 
 import dao.ConnectionFactory;
 import dao.RoadNodesDao;
+import exception.DALException;
 import model.dto.RoadNodesTO;
 
 import javax.xml.transform.Result;
@@ -29,7 +30,7 @@ public class RoadNodesDaoImpl implements RoadNodesDao {
     }
 
     @Override
-    public void insertRoadNodesList(List<RoadNodesTO> roadNodes) {
+    public void insertRoadNodesList(List<RoadNodesTO> roadNodes) throws DALException {
         try {
 
             for (RoadNodesTO roadNode : roadNodes) {
@@ -39,16 +40,15 @@ public class RoadNodesDaoImpl implements RoadNodesDao {
                 insertListPreparedStmt.setInt(3, roadNode.getSequence());
 
                 insertListPreparedStmt.executeUpdate();
-
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException(e.getMessage());
         }
     }
 
     @Override
-    public List<Integer> getRoadNodesIds(int roadId) {
+    public List<Integer> getRoadNodesIds(int roadId) throws DALException {
         try {
             getRoadNodesIdsStmt.setInt(1, roadId);
             ResultSet resultSet = getRoadNodesIdsStmt.executeQuery();
@@ -61,14 +61,12 @@ public class RoadNodesDaoImpl implements RoadNodesDao {
 
             return roadNodesIds;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException(e.getMessage());
         }
-
-        return null;
     }
 
     @Override
-    public RoadNodesTO getRoadNodes(int roadNodesId) {
+    public RoadNodesTO getRoadNodes(int roadNodesId) throws DALException {
         try {
             getRoadNodesStmt.setInt(1, roadNodesId);
 
@@ -80,10 +78,10 @@ public class RoadNodesDaoImpl implements RoadNodesDao {
 
                 return new RoadNodesTO(roadNodesId, roadId, nodeId, sequence);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        return null;
+            throw new DALException("No roadnode found with RoadNodesId = " + roadNodesId);
+        } catch (SQLException e) {
+            throw new DALException(e.getMessage());
+        }
     }
 }

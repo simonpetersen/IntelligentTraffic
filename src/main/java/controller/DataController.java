@@ -1,9 +1,7 @@
 package controller;
 
-import com.graphhopper.routing.util.CarFlagEncoder;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.FlagEncoder;
-import com.graphhopper.storage.Graph;
 import com.graphhopper.storage.GraphBuilder;
 import com.graphhopper.storage.GraphHopperStorage;
 import dao.NodeDao;
@@ -13,6 +11,7 @@ import dao.impl.NodeDaoImpl;
 import dao.impl.RoadDaoImpl;
 
 import dao.impl.RoadNodesDaoImpl;
+import exception.DALException;
 import model.dto.NodeTO;
 import model.dto.RoadNodesTO;
 import model.dto.RoadTO;
@@ -21,9 +20,10 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.ws.rs.core.Application;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +40,7 @@ public class DataController {
 
     public DataController() {
         try {
-            filePath = "src/main/resources/map.osm";
+            filePath = "map.osm";
             nodeDao = new NodeDaoImpl();
             roadDao = new RoadDaoImpl();
             roadNodesDao = new RoadNodesDaoImpl();
@@ -50,28 +50,26 @@ public class DataController {
         }
     }
 
-    public GraphHopperStorage loadMapAsGraph(FlagEncoder encoder) {
+    public GraphHopperStorage loadMapAsGraph(FlagEncoder encoder) throws DALException {
         EncodingManager em = new EncodingManager(encoder);
         GraphBuilder gb = new GraphBuilder(em).setLocation("graphhopper_folder").setStore(true);
-        /*
-        GraphHopperStorage graph = gb.load();
 
-        if (graph.getBaseGraph().getNodes() > 0) {
+        GraphHopperStorage graph;
+        try {
+            graph = gb.load();
+
+            return graph;
+        } catch (IllegalStateException e) {
+            graph = gb.create();
+            loadNodes(graph);
+            loadRoads(graph);
+            //graph.flush();
+
             return graph;
         }
-        */
-
-        GraphHopperStorage graph = gb.create();
-
-        loadNodes(graph);
-        loadRoads(graph);
-
-        graph.flush();
-
-        return graph;
     }
 
-    private void loadNodes(GraphHopperStorage graph) {
+    private void loadNodes(GraphHopperStorage graph) throws DALException {
         List<Integer> nodeIds = nodeDao.getAllNodeIds();
 
         for (int id : nodeIds) {
@@ -80,7 +78,7 @@ public class DataController {
         }
     }
 
-    private void loadRoads(GraphHopperStorage graph) {
+    private void loadRoads(GraphHopperStorage graph) throws DALException {
         List<Integer> roadIds = roadDao.getAllRoadIds();
         for (int roadId : roadIds) {
             List<Integer> roadNodesIds = roadNodesDao.getRoadNodesIds(roadId);
@@ -100,15 +98,17 @@ public class DataController {
     }
 
     private Document loadOsmDocument() throws Exception {
-        File fXmlFile = new File(filePath);
+        //File fXmlFile = new File(filePath);
+        InputStream is = Application.class.getClassLoader().getResourceAsStream(filePath);
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document document = dBuilder.parse(fXmlFile);
+        //Document document = dBuilder.parse(fXmlFile);
+        Document document = dBuilder.parse(is);
 
         return document;
     }
 
-    private void persistObjects(NodeList nodeList) {
+    private void persistObjects(NodeList nodeList) throws DALException {
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
             if (node.getNodeName().equals("node")) {
@@ -120,7 +120,7 @@ public class DataController {
         }
     }
 
-    private void persistNode(Node node) {
+    private void persistNode(Node node) throws DALException {
         NamedNodeMap namedNodeMap = node.getAttributes();
         Node idNode = namedNodeMap.getNamedItem("id");
         Node lonNode = namedNodeMap.getNamedItem("lon");
@@ -140,11 +140,11 @@ public class DataController {
         }
     }
 
-    private void persistRoad(Node node) {
+    private void persistRoad(Node node) throws DALException {
         RoadTO roadTO = new RoadTO(0, 0, 0);
         NodeList childNodes = node.getChildNodes();
 
-        roadDao.insertRoad(roadTO);
+        int roadId = roadDao.insertRoad(roadTO);
 
         if (childNodes != null) {
             int sequence = 0;
@@ -158,7 +158,7 @@ public class DataController {
                         long ref = Long.parseLong(refNode.getNodeValue());
                         if (nodeIdMap.containsKey(ref)) {
                             int refId = nodeIdMap.get(ref);
-                            RoadNodesTO roadNodesTO = new RoadNodesTO(0, roadTO.getRoadId(), refId, sequence);
+                            RoadNodesTO roadNodesTO = new RoadNodesTO(0, roadId, refId, sequence);
                             roadNodes.add(roadNodesTO);
                             sequence++;
                         }

@@ -40,7 +40,7 @@ public class RouteCalculationControllerTest {
                 destinationNode.getLatitude(), destinationNode.getLongitude(), new Date());
 
         assertNotNull(route);
-        assertTrue(!route.getNodes().isEmpty());
+        assertTrue(!route.getNode().isEmpty());
 
         /*
         for (EdgeIteratorState edge : path.calcEdges()) {

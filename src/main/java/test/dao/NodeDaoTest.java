@@ -2,6 +2,7 @@ package test.dao;
 
 import dao.NodeDao;
 import dao.impl.NodeDaoImpl;
+import exception.DALException;
 import model.dto.NodeTO;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +20,7 @@ public class NodeDaoTest {
     }
 
     @Test
-    public void testGetNodeByCoordinates() {
+    public void testGetNodeByCoordinates() throws DALException {
         double latitude = 54.7808636;
         double longitude = 11.4887596;
 

@@ -2,6 +2,7 @@ package dao.impl;
 
 import dao.ConnectionFactory;
 import dao.RoadDao;
+import exception.DALException;
 import model.dto.NodeTO;
 import model.dto.RoadTO;
 
@@ -29,21 +30,19 @@ public class RoadDaoImpl implements RoadDao {
     }
 
     @Override
-    public void insertRoad(RoadTO roadTO) {
+    public int insertRoad(RoadTO roadTO) throws DALException {
         try {
-
             insertPreparedStmt.setInt(1, roadTO.getDistance());
             insertPreparedStmt.setInt(2, roadTO.getTravelTime());
 
-            insertPreparedStmt.executeUpdate();
-
+            return insertPreparedStmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException(e.getMessage());
         }
     }
 
     @Override
-    public List<Integer> getAllRoadIds() {
+    public List<Integer> getAllRoadIds() throws DALException {
         try {
             ResultSet resultSet = getAllIdsStmt.executeQuery();
 
@@ -55,14 +54,12 @@ public class RoadDaoImpl implements RoadDao {
 
             return roadIds;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new DALException(e.getMessage());
         }
-
-        return null;
     }
 
     @Override
-    public RoadTO getRoad(int roadId) {
+    public RoadTO getRoad(int roadId) throws DALException {
         try {
             getRoadStmt.setInt(1, roadId);
             ResultSet resultSet = getRoadStmt.executeQuery();
@@ -73,10 +70,10 @@ public class RoadDaoImpl implements RoadDao {
 
                 return new RoadTO(roadId, distance, travelTime);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-        return null;
+            throw new DALException("No road found with roadId = " + roadId);
+        } catch (SQLException e) {
+            throw new DALException(e.getMessage());
+        }
     }
 }
