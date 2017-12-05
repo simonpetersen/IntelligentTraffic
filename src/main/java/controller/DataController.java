@@ -109,13 +109,14 @@ public class DataController {
     }
 
     private void persistObjects(NodeList nodeList) throws DALException {
+        int roadId = 1;
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
             if (node.getNodeName().equals("node")) {
                 // Persist new Node-object
                 persistNode(node);
             } else if (node.getNodeName().equals("way")) {
-                persistRoad(node);
+                persistRoad(node, roadId++);
             }
         }
     }
@@ -140,11 +141,11 @@ public class DataController {
         }
     }
 
-    private void persistRoad(Node node) throws DALException {
-        RoadTO roadTO = new RoadTO(0, 0, 0);
+    private void persistRoad(Node node, int roadId) throws DALException {
+        RoadTO roadTO = new RoadTO(roadId, 0, 0);
         NodeList childNodes = node.getChildNodes();
 
-        int roadId = roadDao.insertRoad(roadTO);
+        roadDao.insertRoad(roadTO);
 
         if (childNodes != null) {
             int sequence = 0;

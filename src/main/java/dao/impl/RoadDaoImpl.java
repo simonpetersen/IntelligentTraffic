@@ -20,7 +20,7 @@ public class RoadDaoImpl implements RoadDao {
 
         // Initialization of prepared statements
         insertPreparedStmt = ConnectionFactory.getConnection()
-                .prepareStatement("INSERT INTO Road (distance, travelTime) VALUES (?,?)");
+                .prepareStatement("INSERT INTO Road (roadId, distance, travelTime) VALUES (?,?,?)");
 
         getAllIdsStmt = ConnectionFactory.getConnection()
                 .prepareStatement("SELECT roadId FROM Road");
@@ -30,12 +30,13 @@ public class RoadDaoImpl implements RoadDao {
     }
 
     @Override
-    public int insertRoad(RoadTO roadTO) throws DALException {
+    public void insertRoad(RoadTO roadTO) throws DALException {
         try {
-            insertPreparedStmt.setInt(1, roadTO.getDistance());
-            insertPreparedStmt.setInt(2, roadTO.getTravelTime());
+            insertPreparedStmt.setInt(1, roadTO.getRoadId());
+            insertPreparedStmt.setInt(2, roadTO.getDistance());
+            insertPreparedStmt.setInt(3, roadTO.getTravelTime());
 
-            return insertPreparedStmt.executeUpdate();
+            insertPreparedStmt.executeUpdate();
         } catch (SQLException e) {
             throw new DALException(e.getMessage());
         }

@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface RoadDao {
 
-    int insertRoad(RoadTO roadTO) throws DALException;
+    void insertRoad(RoadTO roadTO) throws DALException;
     List<Integer> getAllRoadIds() throws DALException;
     RoadTO getRoad(int roadId) throws DALException;
 }
