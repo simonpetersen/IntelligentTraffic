@@ -85,7 +85,8 @@ public class DataController {
             for (int i = 0; i < roadNodesIds.size() - 1; i++) {
                 RoadNodesTO startNode = roadNodesDao.getRoadNodes(roadNodesIds.get(i));
                 RoadNodesTO endNode = roadNodesDao.getRoadNodes(roadNodesIds.get(i+1));
-                graph.edge(startNode.getNodeId(), endNode.getNodeId(), 1, true);
+                double dist = calcDist(nodeDao.getNode(startNode.getNodeId()), nodeDao.getNode(endNode.getNodeId()));
+                graph.edge(startNode.getNodeId(), endNode.getNodeId(), dist, true);
             }
         }
     }
@@ -169,5 +170,19 @@ public class DataController {
 
             roadNodesDao.insertRoadNodesList(roadNodes);
         }
+    }
+
+    private double calcDist(NodeTO node1, NodeTO node2){
+
+        double R = 6371000.0;
+        double dLat = Math.toRadians(node1.getLatitude()- node2.getLatitude());
+        double dLon = Math.toRadians(node1.getLongitude() - node2.getLongitude());
+
+        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(Math.toRadians(node1.getLatitude())) * Math.cos(Math.toRadians(node2.getLatitude())) *
+                        Math.sin(dLon/2) * Math.sin(dLon/2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        return R * c;
     }
 }
