@@ -39,9 +39,15 @@ public class RouteCalculationController {
         NodeTO startNode = nodeDao.getNodeByCoordinates(startLat, startLon);
         NodeTO destinationNode = nodeDao.getNodeByCoordinates(destinationLat, destinationLon);
 
-        if (startNode == null || destinationNode == null) {
+        if (startNode == null || destinationNode == null)
             throw new DALException("Unknown nodes.");
-        }
+
+        if (!nodeDao.isNodeOnRoad(startNode.getNodeId()))
+            startNode = nodeDao.getClosestNodeOnRoad(startNode.getStreetName(), startLat, startLon);
+
+        if (!nodeDao.isNodeOnRoad(destinationNode.getNodeId()))
+            destinationNode = nodeDao.getClosestNodeOnRoad(destinationNode.getStreetName(), destinationLat, destinationLon);
+
 
         FlagEncoder encoder = new CarFlagEncoder();
         GraphHopperStorage graph = dataController.loadMapAsGraph(encoder);
@@ -51,10 +57,10 @@ public class RouteCalculationController {
 
         Path path = dijkstra.calcPath(startNode.getNodeId(), destinationNode.getNodeId());
 
-        return mapPathToRoute(path);
+        return mapPathToRoute(path, startNode, destinationNode);
     }
 
-    private Route mapPathToRoute(Path path) throws DALException {
+    private Route mapPathToRoute(Path path, NodeTO startNodeTO, NodeTO destinationNodeTO) throws DALException {
         List<Node> nodeList = new ArrayList<>();
         List<EdgeIteratorState> edges = path.calcEdges();
         int duration = 0;
@@ -77,6 +83,17 @@ public class RouteCalculationController {
             if (!nodeList.contains(adjNode)) {
                 nodeList.add(adjNode);
             }
+        }
+
+        Node startNode = new Node(startNodeTO.getNodeId(), startNodeTO.getLatitude(), startNodeTO.getLongitude());
+        Node destinationNode = new Node(destinationNodeTO.getNodeId(), destinationNodeTO.getLatitude(), destinationNodeTO.getLongitude());
+
+        if (!nodeList.contains(startNode)) {
+            nodeList.add(0, startNode);
+        }
+
+        if (!nodeList.contains(destinationNode)) {
+            nodeList.add(destinationNode);
         }
 
         return new Route(nodeList, duration);

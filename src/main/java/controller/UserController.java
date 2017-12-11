@@ -82,11 +82,11 @@ public class UserController {
             if (!userDao.validateApiKeyAdmin(apiKey)) {
                 throw new WebServiceException("Authorization error: User is not authorized for this operation.");
             }
-        } catch (DALException e) {
-            throw new WebServiceException(e.getMessage());
-        }
 
-        try {
+            if (username.equalsIgnoreCase("admin")) {
+                throw new WebServiceException("Error: This user can't be deleted.");
+            }
+
             userDao.deleteUser(username);
         } catch (DALException e) {
             throw new WebServiceException("Error while deleting user: " + e.getMessage());

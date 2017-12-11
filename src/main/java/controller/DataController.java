@@ -19,6 +19,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import util.TravelTimeCalculationUtil;
 
 import javax.ws.rs.core.Application;
 import javax.xml.parsers.DocumentBuilder;
@@ -79,14 +80,17 @@ public class DataController {
     }
 
     private void loadRoads(GraphHopperStorage graph) throws DALException {
-        List<Integer> roadIds = roadDao.getAllRoadIds();
-        for (int roadId : roadIds) {
-            List<Integer> roadNodesIds = roadNodesDao.getRoadNodesIds(roadId);
+        List<RoadTO> roads = roadDao.getAllRoads();
+        for (RoadTO road : roads) {
+            List<Integer> roadNodesIds = roadNodesDao.getRoadNodesIds(road.getRoadId());
             for (int i = 0; i < roadNodesIds.size() - 1; i++) {
-                RoadNodesTO startNode = roadNodesDao.getRoadNodes(roadNodesIds.get(i));
-                RoadNodesTO endNode = roadNodesDao.getRoadNodes(roadNodesIds.get(i+1));
-                double dist = calcDist(nodeDao.getNode(startNode.getNodeId()), nodeDao.getNode(endNode.getNodeId()));
-                graph.edge(startNode.getNodeId(), endNode.getNodeId(), dist, true);
+                int startNodeId = roadNodesDao.getRoadNodes(roadNodesIds.get(i)).getNodeId();
+                int endNodeId = roadNodesDao.getRoadNodes(roadNodesIds.get(i+1)).getNodeId();
+                NodeTO startNode = nodeDao.getNode(startNodeId);
+                NodeTO endNode = nodeDao.getNode(endNodeId);
+                double dist = TravelTimeCalculationUtil.calcDist(startNode.getLatitude(), startNode.getLongitude(),
+                        endNode.getLatitude(), endNode.getLongitude());
+                graph.edge(startNode.getNodeId(), endNode.getNodeId(), dist, !road.isOneWay());
             }
         }
     }
@@ -136,25 +140,41 @@ public class DataController {
             double latitude = Double.parseDouble(latNode.getNodeValue());
             double longitude = Double.parseDouble(lonNode.getNodeValue());
             int id = nodeIdMap.get(idLong);
+            String streetname = getNodeStreetName(node.getChildNodes());
 
-            NodeTO nodeTO = new NodeTO(id, null, latitude, longitude);
+            NodeTO nodeTO = new NodeTO(id, null, latitude, longitude, streetname);
             nodeDao.insertNode(nodeTO);
         }
     }
 
     private void persistRoad(Node node, int roadId) throws DALException {
-        RoadTO roadTO = new RoadTO(roadId, 0, 0);
+        RoadTO roadTO = new RoadTO(roadId, 0, null, false, 0);
         NodeList childNodes = node.getChildNodes();
-
-        roadDao.insertRoad(roadTO);
 
         if (childNodes != null) {
             int sequence = 0;
+            // Iterate over childnodes
             List<RoadNodesTO> roadNodes = new ArrayList<>();
             for (int i = 0; i < childNodes.getLength(); i++) {
                 Node childNode = childNodes.item(i);
                 NamedNodeMap childNodeAttributes = childNode.getAttributes();
                 if (childNodeAttributes != null) {
+                    // Look for child-node with attribute k="name" and v=streetname or key="oneway"
+                    Node keyAttribute = childNodeAttributes.getNamedItem("k");
+                    if (keyAttribute != null) {
+                        Node valueAttribute = childNodeAttributes.getNamedItem("v");
+                        if (keyAttribute.getNodeValue().equals("name")) {
+                            roadTO.setStreetName(valueAttribute.getNodeValue());
+                        } else if (keyAttribute.getNodeValue().equals("oneway")) {
+                            boolean oneWay = valueAttribute.getNodeValue().equals("yes");
+                            roadTO.setOneWay(oneWay);
+                        } else if(keyAttribute.getNodeValue().equals("maxspeed")) {
+                            int maxSpeed = Integer.parseInt(valueAttribute.getNodeValue());
+                            roadTO.setMaxSpeed(maxSpeed);
+                        }
+                    }
+
+                    // Look for childnode with attribute ref=nodeid
                     Node refNode = childNodeAttributes.getNamedItem("ref");
                     if (refNode != null) {
                         long ref = Long.parseLong(refNode.getNodeValue());
@@ -168,21 +188,41 @@ public class DataController {
                 }
             }
 
+            double distance = calcTotalRoadDistance(roadNodes);
+            roadTO.setDistance(distance);
+
+            roadDao.insertRoad(roadTO);
+
             roadNodesDao.insertRoadNodesList(roadNodes);
         }
     }
 
-    private double calcDist(NodeTO node1, NodeTO node2){
+    private double calcTotalRoadDistance(List<RoadNodesTO> roadNodes) throws DALException {
+        List<Double> distances = new ArrayList<>();
 
-        double R = 6371000.0;
-        double dLat = Math.toRadians(node1.getLatitude()- node2.getLatitude());
-        double dLon = Math.toRadians(node1.getLongitude() - node2.getLongitude());
+        for (int i = 0; i < roadNodes.size() - 1; i++) {
+            NodeTO baseNode = nodeDao.getNode(roadNodes.get(i).getNodeId());
+            NodeTO adjNode = nodeDao.getNode(roadNodes.get(i+1).getNodeId());
 
-        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(Math.toRadians(node1.getLatitude())) * Math.cos(Math.toRadians(node2.getLatitude())) *
-                        Math.sin(dLon/2) * Math.sin(dLon/2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            distances.add(TravelTimeCalculationUtil.calcDist(baseNode.getLatitude(), baseNode.getLongitude(), adjNode.getLatitude(),
+                    adjNode.getLongitude()));
+        }
 
-        return R * c;
+        return distances.stream().mapToDouble(dist -> dist).sum();
+    }
+
+    private String getNodeStreetName(NodeList nodeList) {
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node childNode = nodeList.item(i);
+            NamedNodeMap childNodeAttributes = childNode.getAttributes();
+            if (childNodeAttributes != null) {
+                Node keyAttribute = childNodeAttributes.getNamedItem("k");
+                if (keyAttribute != null && keyAttribute.getNodeValue().equals("addr:street")) {
+                    Node valueAttribute = childNodeAttributes.getNamedItem("v");
+                    return valueAttribute.getNodeValue();
+                }
+            }
+        }
+        return null;
     }
 }

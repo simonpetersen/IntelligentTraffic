@@ -2,12 +2,17 @@ package model.dto;
 
 public class RoadTO {
 
-    private int roadId, distance, travelTime;
+    private int roadId, maxSpeed;
+    private double distance;
+    private String streetName;
+    private boolean oneWay;
 
-    public RoadTO(int RoadId, int distance, int travelTime) {
+    public RoadTO(int RoadId, double distance, String streetName, boolean oneWay, int maxSpeed) {
         this.roadId = RoadId;
         this.distance = distance;
-        this.travelTime = travelTime;
+        this.streetName = streetName;
+        this.oneWay = oneWay;
+        this.maxSpeed = maxSpeed;
     }
 
     public int getRoadId() {
@@ -18,19 +23,35 @@ public class RoadTO {
         this.roadId = roadId;
     }
 
-    public int getDistance() {
+    public double getDistance() {
         return distance;
     }
 
-    public void setDistance(int distance) {
+    public void setDistance(double distance) {
         this.distance = distance;
     }
 
-    public int getTravelTime() {
-        return travelTime;
+    public String getStreetName() {
+        return streetName;
     }
 
-    public void setTravelTime(int travelTime) {
-        this.travelTime = travelTime;
+    public void setStreetName(String streetName) {
+        this.streetName = streetName;
+    }
+
+    public boolean isOneWay() {
+        return oneWay;
+    }
+
+    public void setOneWay(boolean oneWay) {
+        this.oneWay = oneWay;
+    }
+
+    public int getMaxSpeed() {
+        return maxSpeed;
+    }
+
+    public void setMaxSpeed(int maxSpeed) {
+        this.maxSpeed = maxSpeed;
     }
 }

@@ -34,15 +34,25 @@ public class RouteCalculationControllerTest {
 
     @Test
     public void testCalculateRoute() throws Exception {
-        NodeTO startNode = nodeDao.getNode(1);
-        NodeTO destinationNode = nodeDao.getNode(2);
-        Route route = routeCalculationController.calculateRoute(startNode.getLatitude(), startNode.getLongitude(),
-                destinationNode.getLatitude(), destinationNode.getLongitude(), new Date());
+        NodeTO startNode = nodeDao.getNode(2447);
 
+        int i = 1;
+        while (true) {
+            NodeTO destinationNode = nodeDao.getNode(i);
+            Route route = routeCalculationController.calculateRoute(startNode.getLatitude(), startNode.getLongitude(),
+                    destinationNode.getLatitude(), destinationNode.getLongitude(), new Date());
+
+            if (!route.getNode().isEmpty()) {
+                System.out.println(i);
+            }
+
+            i++;
+        }
+
+        /*
         assertNotNull(route);
         assertTrue(!route.getNode().isEmpty());
 
-        /*
         for (EdgeIteratorState edge : path.calcEdges()) {
             System.out.println(edge.getBaseNode() + " to " + edge.getAdjNode());
         }

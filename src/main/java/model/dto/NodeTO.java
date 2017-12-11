@@ -3,14 +3,15 @@ package model.dto;
 public class NodeTO {
 
     private int nodeId;
-    private String type;
+    private String type, streetName;
     private double latitude, longitude;
 
-    public NodeTO(int nodeId, String type, double latitude, double longitude) {
+    public NodeTO(int nodeId, String type, double latitude, double longitude, String streetName) {
         this.nodeId = nodeId;
         this.type = type;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.streetName = streetName;
     }
 
     public int getNodeId() {
@@ -43,5 +44,13 @@ public class NodeTO {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public String getStreetName() {
+        return streetName;
+    }
+
+    public void setStreetName(String streetName) {
+        this.streetName = streetName;
     }
 }
