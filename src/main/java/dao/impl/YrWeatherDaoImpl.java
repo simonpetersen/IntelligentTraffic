@@ -13,15 +13,12 @@ import java.util.Date;
 
 public class YrWeatherDaoImpl implements YrWeatherDao {
 
-    private PreparedStatement createPreparedStmt = null;
-    private PreparedStatement getNewestPreparedStmt = null;
-    private PreparedStatement deletePreparedStmt = null;
+    private PreparedStatement createPreparedStmt, getNewestPreparedStmt,deletePreparedStmt;
     private SimpleDateFormat simpleDateFormat;
 
     public YrWeatherDaoImpl() throws Exception {
 
         // Initialization of prepared statements
-        // (`Id`,`Type`,`Latitude`,`Longitude`)
         createPreparedStmt = ConnectionFactory.getConnection()
                 .prepareStatement("INSERT INTO YrWeatherDataCache (date, xml) VALUES (?,?)");
         getNewestPreparedStmt = ConnectionFactory.getConnection()
@@ -40,12 +37,12 @@ public class YrWeatherDaoImpl implements YrWeatherDao {
                 String dateString = resultSet.getString("date");
                 Date date = simpleDateFormat.parse(dateString);
                 String xml = resultSet.getString("Xml");
-                int id = resultSet.getInt("Id");
+                int id = resultSet.getInt("YrId");
 
                 return new WeatherDataCacheTO(id, date, xml);
             }
 
-            throw new DALException("No cachched data found.");
+            throw new DALException("No cached data found.");
         } catch (Exception e) {
             throw new DALException(e.getMessage());
         }
@@ -59,17 +56,6 @@ public class YrWeatherDaoImpl implements YrWeatherDao {
             createPreparedStmt.setString(2, weatherDataCacheTO.getXml());
 
             createPreparedStmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new DALException(e.getMessage());
-        }
-    }
-
-    @Override
-    public void deleteWeatherData(WeatherDataCacheTO weatherDataCacheTO) throws DALException {
-        try {
-            deletePreparedStmt.setInt(1, weatherDataCacheTO.getYrId());
-
-            deletePreparedStmt.executeUpdate();
         } catch (SQLException e) {
             throw new DALException(e.getMessage());
         }

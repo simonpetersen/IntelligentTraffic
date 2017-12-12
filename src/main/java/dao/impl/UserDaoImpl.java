@@ -17,9 +17,9 @@ public class UserDaoImpl implements UserDao {
 
     public UserDaoImpl() throws Exception {
         createUserStmt = ConnectionFactory.getConnection().prepareStatement("INSERT INTO User (Username, Password, ApiKey , Name, Admin)" +
-                "VALUES (?,SHA1(?),?,?,?)");
+                "VALUES (?,?,?,?,?)");
         deleteUserStmt = ConnectionFactory.getConnection().prepareStatement("DELETE FROM User WHERE Username = ?");
-        loginStmt = ConnectionFactory.getConnection().prepareStatement("SELECT * FROM User WHERE username = ? AND password = SHA1(?)");
+        loginStmt = ConnectionFactory.getConnection().prepareStatement("SELECT * FROM User WHERE username = ? AND password = ?");
         validateStmt = ConnectionFactory.getConnection().prepareStatement("SELECT * FROM User WHERE ApiKey = ?");
         validateAdminStmt = ConnectionFactory.getConnection().prepareStatement("SELECT Admin FROM User WHERE ApiKey = ?");
     }
