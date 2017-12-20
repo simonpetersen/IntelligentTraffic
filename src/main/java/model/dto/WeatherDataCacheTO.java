@@ -14,6 +14,11 @@ public class WeatherDataCacheTO {
         this.xml = xml;
     }
 
+    public WeatherDataCacheTO(Date date, String xml) {
+        this.date = date;
+        this.xml = xml;
+    }
+
     public int getYrId() {
         return yrId;
     }

@@ -51,23 +51,16 @@ public class DataController {
         }
     }
 
-    public GraphHopperStorage loadMapAsGraph(FlagEncoder encoder) throws DALException {
+    public GraphHopperStorage loadMapAsGraph(FlagEncoder encoder, double travelTimeReductionFactor) throws DALException {
         EncodingManager em = new EncodingManager(encoder);
         GraphBuilder gb = new GraphBuilder(em).setLocation("graphhopper_folder").setStore(true);
 
-        GraphHopperStorage graph;
-        try {
-            graph = gb.load();
+        GraphHopperStorage graph = gb.create();
+        loadNodes(graph);
+        loadRoads(graph, travelTimeReductionFactor);
+        //graph.flush();
 
-            return graph;
-        } catch (IllegalStateException e) {
-            graph = gb.create();
-            loadNodes(graph);
-            loadRoads(graph);
-            //graph.flush();
-
-            return graph;
-        }
+        return graph;
     }
 
     private void loadNodes(GraphHopperStorage graph) throws DALException {
@@ -79,7 +72,7 @@ public class DataController {
         }
     }
 
-    private void loadRoads(GraphHopperStorage graph) throws DALException {
+    private void loadRoads(GraphHopperStorage graph, double travelTimeReductionFactor) throws DALException {
         List<RoadTO> roads = roadDao.getAllRoads();
         for (RoadTO road : roads) {
             List<Integer> roadNodesIds = roadNodesDao.getRoadNodesIds(road.getRoadId());
@@ -88,9 +81,14 @@ public class DataController {
                 int endNodeId = roadNodesDao.getRoadNodes(roadNodesIds.get(i+1)).getNodeId();
                 NodeTO startNode = nodeDao.getNode(startNodeId);
                 NodeTO endNode = nodeDao.getNode(endNodeId);
-                double dist = TravelTimeCalculationUtil.calcDist(startNode.getLatitude(), startNode.getLongitude(),
-                        endNode.getLatitude(), endNode.getLongitude());
-                graph.edge(startNode.getNodeId(), endNode.getNodeId(), dist, !road.isOneWay());
+
+                // Assuming maxspeed of 50 km/h if no value stated
+                int maxSpeed = road.getMaxSpeed() != 0 ? road.getMaxSpeed() : 50;
+                double time = TravelTimeCalculationUtil.calcTime(startNode, endNode, maxSpeed);
+
+                // Add additional time according to calculated travelTimeReductionFactor
+                time *= travelTimeReductionFactor;
+                graph.edge(startNode.getNodeId(), endNode.getNodeId(), time, !road.isOneWay());
             }
         }
     }
@@ -150,6 +148,7 @@ public class DataController {
     private void persistRoad(Node node, int roadId) throws DALException {
         RoadTO roadTO = new RoadTO(roadId, 0, null, false, 0);
         NodeList childNodes = node.getChildNodes();
+        boolean shouldPersistRoad = true;
 
         if (childNodes != null) {
             int sequence = 0;
@@ -171,6 +170,14 @@ public class DataController {
                         } else if(keyAttribute.getNodeValue().equals("maxspeed")) {
                             int maxSpeed = Integer.parseInt(valueAttribute.getNodeValue());
                             roadTO.setMaxSpeed(maxSpeed);
+                        } else if (keyAttribute.getNodeValue().equals("highway")) {
+                            String highwayValue = valueAttribute.getNodeValue();
+                            if (highwayValue.equals("footway") || highwayValue.equals("path") || highwayValue.equals("pedestrian") ||
+                                    highwayValue.equals("bridleway") || highwayValue.equals("cycleway")) {
+                                shouldPersistRoad = false;
+                            }
+                        } else if (keyAttribute.getNodeValue().equals("railway")) {
+                            shouldPersistRoad = false;
                         }
                     }
 
@@ -191,9 +198,10 @@ public class DataController {
             double distance = calcTotalRoadDistance(roadNodes);
             roadTO.setDistance(distance);
 
-            roadDao.insertRoad(roadTO);
-
-            roadNodesDao.insertRoadNodesList(roadNodes);
+            if (shouldPersistRoad) {
+                roadDao.insertRoad(roadTO);
+                roadNodesDao.insertRoadNodesList(roadNodes);
+            }
         }
     }
 

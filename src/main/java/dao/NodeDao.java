@@ -13,4 +13,5 @@ public interface NodeDao {
     NodeTO getNodeByCoordinates(double latitude, double longitude) throws DALException;
     NodeTO getClosestNodeOnRoad(String streetName, double latitude, double longitude) throws DALException;
     boolean isNodeOnRoad(int nodeId) throws DALException;
+    int getNumberOfNodes() throws DALException;
 }

@@ -33,19 +33,26 @@ public class YrWeatherDataConnector {
     }
 
     public YrWeatherDataXml getWeatherData() throws Exception {
-        WeatherDataCacheTO weatherDataCacheTO = yrWeatherDao.getNewestCachedData();
+        WeatherDataCacheTO weatherDataCacheTO = null;
+        try {
+            weatherDataCacheTO = yrWeatherDao.getNewestCachedData();
+        } catch (DALException e) {
+            e.printStackTrace();
+        }
 
-        long cachedTime = new Date().getTime() - weatherDataCacheTO.getDate().getTime();
-        if (cachedTime < tenMinutes) {
-            String xml = weatherDataCacheTO.getXml();
-            return XmlHelper.stringToObj(xml, YrWeatherDataXml.class);
+        if (weatherDataCacheTO != null) {
+            long cachedTime = new Date().getTime() - weatherDataCacheTO.getDate().getTime();
+            if (cachedTime < tenMinutes) {
+                String xml = weatherDataCacheTO.getXml();
+                return XmlHelper.stringToObj(xml, YrWeatherDataXml.class);
+            }
         }
 
         // Cached weather data is too old, retrieve new and cache
         YrWeatherDataXml yrWeatherDataXml = getWeatherDataFromYr();
         Date date = new Date();
         String xml = XmlHelper.objToString(yrWeatherDataXml);
-        WeatherDataCacheTO weatherData = new WeatherDataCacheTO(1, date, xml);
+        WeatherDataCacheTO weatherData = new WeatherDataCacheTO(date, xml);
         yrWeatherDao.cacheWeatherData(weatherData);
 
         return yrWeatherDataXml;
@@ -62,7 +69,7 @@ public class YrWeatherDataConnector {
                     String xmlObj = "";
                     for (Object obj : lines.toArray()) {
                         String s = (String) obj;
-                        xmlObj.concat(s);
+                        xmlObj += s;
                     }
                     return XmlHelper.stringToObj(xmlObj, YrWeatherDataXml.class);
                 }

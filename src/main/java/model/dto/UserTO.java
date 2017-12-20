@@ -1,8 +1,5 @@
 package model.dto;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class UserTO {
 
     private String username, password, apiKey, name;

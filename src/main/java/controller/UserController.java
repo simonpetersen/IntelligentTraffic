@@ -23,11 +23,7 @@ public class UserController {
     }
 
     public boolean validateApiKey(String apiKey) throws WebServiceException {
-        try {
-            return userDao.validateApiKey(apiKey);
-        } catch (DALException e) {
-            throw new WebServiceException(e.getMessage());
-        }
+        return userDao.validateApiKey(apiKey);
     }
 
     public User login(String username, String password) throws WebServiceException {
@@ -50,12 +46,8 @@ public class UserController {
     }
 
     public Response createUser(String username, String password, String name, String adminStr, String apiKey) throws WebServiceException  {
-        try {
-            if (!userDao.validateApiKeyAdmin(apiKey)) {
-                throw new WebServiceException("Authorization error: User is not authorized for this operation.");
-            }
-        } catch (DALException e) {
-            throw new WebServiceException(e.getMessage());
+        if (!validateApiKeyAdmin(apiKey)) {
+            throw new WebServiceException("Authorization error: User is not authorized for this operation.");
         }
 
         if (username != null && password != null && name != null && adminStr != null && !username.isEmpty() &&
@@ -78,11 +70,11 @@ public class UserController {
     }
 
     public Response deleteUser(String username, String apiKey) throws WebServiceException {
-        try {
-            if (!userDao.validateApiKeyAdmin(apiKey)) {
-                throw new WebServiceException("Authorization error: User is not authorized for this operation.");
-            }
+        if (!validateApiKeyAdmin(apiKey)) {
+            throw new WebServiceException("Authorization error: User is not authorized for this operation.");
+        }
 
+        try {
             if (username.equalsIgnoreCase("admin")) {
                 throw new WebServiceException("Error: This user can't be deleted.");
             }
@@ -93,5 +85,9 @@ public class UserController {
         }
 
         return Response.ok().build();
+    }
+
+    public boolean validateApiKeyAdmin(String apiKey) {
+        return userDao.validateApiKeyAdmin(apiKey);
     }
 }

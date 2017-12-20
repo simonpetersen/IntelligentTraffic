@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import java.util.Date;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -34,20 +35,14 @@ public class RouteCalculationControllerTest {
 
     @Test
     public void testCalculateRoute() throws Exception {
-        NodeTO startNode = nodeDao.getNode(2447);
+        NodeTO startNode = nodeDao.getNode(4687);
+        NodeTO destinationNode = nodeDao.getNode(5396);
+        Date date = new Date(new Date().getTime() + 24*60*60*1000);
 
-        int i = 1;
-        while (true) {
-            NodeTO destinationNode = nodeDao.getNode(i);
-            Route route = routeCalculationController.calculateRoute(startNode.getLatitude(), startNode.getLongitude(),
-                    destinationNode.getLatitude(), destinationNode.getLongitude(), new Date());
+        Route route = routeCalculationController.calculateRoute(startNode.getLatitude(), startNode.getLongitude(),
+                    destinationNode.getLatitude(), destinationNode.getLongitude(), date);
 
-            if (!route.getNode().isEmpty()) {
-                System.out.println(i);
-            }
-
-            i++;
-        }
+        assertFalse(route.getNode().isEmpty());
 
         /*
         assertNotNull(route);

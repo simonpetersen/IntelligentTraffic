@@ -53,7 +53,7 @@ public class UserDaoImpl implements UserDao {
                 String name = resultSet.getString("name");
                 boolean admin = resultSet.getBoolean("admin");
 
-                return new UserTO(username, null, apiKey, name, admin);
+                return new UserTO(username, password, apiKey, name, admin);
             }
         } catch (SQLException e) {
             throw new DALException(e.getMessage());
@@ -74,7 +74,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public boolean validateApiKey(String apiKey) throws DALException {
+    public boolean validateApiKey(String apiKey) {
         try {
             validateStmt.setString(1, apiKey);
 
@@ -91,7 +91,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public boolean validateApiKeyAdmin(String apiKey) throws DALException {
+    public boolean validateApiKeyAdmin(String apiKey) {
         try {
             validateAdminStmt.setString(1, apiKey);
 

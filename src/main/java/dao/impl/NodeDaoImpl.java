@@ -14,7 +14,8 @@ import java.util.List;
 
 public class NodeDaoImpl implements NodeDao {
 
-    private PreparedStatement insertPreparedStmt, getNodeStmt, getAllIdsStmt, getNodeByCoordinatesStmt, getClosestNodeStmt, isNodeOnRoadStmt;
+    private PreparedStatement insertPreparedStmt, getNodeStmt, getAllIdsStmt, getNodeByCoordinatesStmt,
+            getClosestNodeStmt, isNodeOnRoadStmt, countNodesStmt;
 
     public NodeDaoImpl() throws Exception {
 
@@ -37,6 +38,9 @@ public class NodeDaoImpl implements NodeDao {
 
         isNodeOnRoadStmt = ConnectionFactory.getConnection()
                 .prepareStatement("SELECT * FROM RoadNodes WHERE Node = ?");
+
+        countNodesStmt = ConnectionFactory.getConnection()
+                .prepareStatement("SELECT COUNT(*) FROM Node");
     }
 
     @Override
@@ -167,6 +171,21 @@ public class NodeDaoImpl implements NodeDao {
                 return true;
 
             return false;
+        } catch (SQLException e) {
+            throw new DALException(e.getMessage());
+        }
+    }
+
+    @Override
+    public int getNumberOfNodes() throws DALException {
+        try {
+            ResultSet resultSet = countNodesStmt.executeQuery();
+
+            if (resultSet.first()) {
+                return resultSet.getInt("Count(*)");
+            }
+
+            throw new DALException("Error in query.");
         } catch (SQLException e) {
             throw new DALException(e.getMessage());
         }
