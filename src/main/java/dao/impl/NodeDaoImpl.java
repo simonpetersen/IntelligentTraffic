@@ -131,26 +131,27 @@ public class NodeDaoImpl implements NodeDao {
 
             ResultSet resultSet = getClosestNodeStmt.executeQuery();
             if (resultSet.first()) {
+                NodeTO node = new NodeTO(0, null, latitude, longitude, streetName);
                 double nodeLatitude = resultSet.getDouble("Latitude");
                 double nodeLongitude = resultSet.getDouble("Longitude");
                 int closestNodeId = resultSet.getInt("NodeId");
-                double smallestDist = TravelTimeCalculationUtil.calcDist(latitude, longitude, nodeLatitude, nodeLongitude);
+                NodeTO closestNode = new NodeTO(closestNodeId, null, nodeLatitude, nodeLongitude, streetName);
+                double smallestDist = TravelTimeCalculationUtil.calcDist(node, closestNode);
 
                 while (resultSet.next()) {
                     double nextLatitude = resultSet.getDouble("Latitude");
                     double nextLongitude = resultSet.getDouble("Longitude");
                     int nextNodeId = resultSet.getInt("NodeId");
-                    double distance = TravelTimeCalculationUtil.calcDist(latitude, longitude, nextLatitude, nextLongitude);
+                    NodeTO nextNode = new NodeTO(nextNodeId, null, nextLatitude, nextLongitude, streetName);
+                    double distance = TravelTimeCalculationUtil.calcDist(node, nextNode);
 
                     if (distance < smallestDist) {
-                        nodeLatitude = nextLatitude;
-                        nodeLongitude = nextLongitude;
-                        closestNodeId = nextNodeId;
+                        closestNode = nextNode;
                         smallestDist = distance;
                     }
                 }
 
-                return new NodeTO(closestNodeId, null, nodeLatitude, nodeLongitude, streetName);
+                return closestNode;
             }
 
             throw new DALException(streetName + " is not a valid street name.");

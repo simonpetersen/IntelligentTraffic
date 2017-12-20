@@ -6,6 +6,7 @@ import com.graphhopper.storage.GraphHopperStorage;
 import controller.DataController;
 import dao.NodeDao;
 import dao.impl.NodeDaoImpl;
+import model.dto.NodeTO;
 import org.junit.Before;
 import org.junit.Test;
 import util.TravelTimeCalculationUtil;
@@ -48,13 +49,11 @@ public class DataControllerTest {
 
     @Test
     public void testCalculateDistance() {
-        double latitudePoint1 = 54.7746152;
-        double longitudePoint1 = 11.5020717;
-        double latitudePoint2 = 54.7747045;
-        double longitudePoint2 = 11.5030908;
+        NodeTO startNode = new NodeTO(1, null, 54.7746152, 11.5020717, null);
+        NodeTO destinationNode = new NodeTO(2, null, 54.7747045, 11.5030908, null);
 
         // Calculated the distance between the first two nodes of Østergade.
-        double calculatedDistance = TravelTimeCalculationUtil.calcDist(latitudePoint1, longitudePoint1, latitudePoint2, longitudePoint2);
+        double calculatedDistance = TravelTimeCalculationUtil.calcDist(startNode, destinationNode);
         double expectedDistance = 66.11; // meters
 
         assertEquals(expectedDistance, calculatedDistance, 0.01);

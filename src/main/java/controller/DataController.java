@@ -55,12 +55,19 @@ public class DataController {
         EncodingManager em = new EncodingManager(encoder);
         GraphBuilder gb = new GraphBuilder(em).setLocation("graphhopper_folder").setStore(true);
 
-        GraphHopperStorage graph = gb.create();
-        loadNodes(graph);
-        loadRoads(graph, travelTimeReductionFactor);
-        //graph.flush();
+        GraphHopperStorage graph;
+        try {
+            graph = gb.load();
 
-        return graph;
+            return graph;
+        } catch (IllegalStateException e) {
+            graph = gb.create();
+            loadNodes(graph);
+            loadRoads(graph, travelTimeReductionFactor);
+            //graph.flush();
+
+            return graph;
+        }
     }
 
     private void loadNodes(GraphHopperStorage graph) throws DALException {
@@ -82,12 +89,10 @@ public class DataController {
                 NodeTO startNode = nodeDao.getNode(startNodeId);
                 NodeTO endNode = nodeDao.getNode(endNodeId);
 
-                // Assuming maxspeed of 50 km/h if no value stated
                 int maxSpeed = road.getMaxSpeed() != 0 ? road.getMaxSpeed() : 50;
                 double time = TravelTimeCalculationUtil.calcTime(startNode, endNode, maxSpeed);
-
-                // Add additional time according to calculated travelTimeReductionFactor
                 time *= travelTimeReductionFactor;
+
                 graph.edge(startNode.getNodeId(), endNode.getNodeId(), time, !road.isOneWay());
             }
         }
@@ -148,7 +153,6 @@ public class DataController {
     private void persistRoad(Node node, int roadId) throws DALException {
         RoadTO roadTO = new RoadTO(roadId, 0, null, false, 0);
         NodeList childNodes = node.getChildNodes();
-        boolean shouldPersistRoad = true;
 
         if (childNodes != null) {
             int sequence = 0;
@@ -170,14 +174,6 @@ public class DataController {
                         } else if(keyAttribute.getNodeValue().equals("maxspeed")) {
                             int maxSpeed = Integer.parseInt(valueAttribute.getNodeValue());
                             roadTO.setMaxSpeed(maxSpeed);
-                        } else if (keyAttribute.getNodeValue().equals("highway")) {
-                            String highwayValue = valueAttribute.getNodeValue();
-                            if (highwayValue.equals("footway") || highwayValue.equals("path") || highwayValue.equals("pedestrian") ||
-                                    highwayValue.equals("bridleway") || highwayValue.equals("cycleway")) {
-                                shouldPersistRoad = false;
-                            }
-                        } else if (keyAttribute.getNodeValue().equals("railway")) {
-                            shouldPersistRoad = false;
                         }
                     }
 
@@ -198,10 +194,9 @@ public class DataController {
             double distance = calcTotalRoadDistance(roadNodes);
             roadTO.setDistance(distance);
 
-            if (shouldPersistRoad) {
-                roadDao.insertRoad(roadTO);
-                roadNodesDao.insertRoadNodesList(roadNodes);
-            }
+            roadDao.insertRoad(roadTO);
+
+            roadNodesDao.insertRoadNodesList(roadNodes);
         }
     }
 
@@ -212,8 +207,7 @@ public class DataController {
             NodeTO baseNode = nodeDao.getNode(roadNodes.get(i).getNodeId());
             NodeTO adjNode = nodeDao.getNode(roadNodes.get(i+1).getNodeId());
 
-            distances.add(TravelTimeCalculationUtil.calcDist(baseNode.getLatitude(), baseNode.getLongitude(), adjNode.getLatitude(),
-                    adjNode.getLongitude()));
+            distances.add(TravelTimeCalculationUtil.calcDist(baseNode, adjNode));
         }
 
         return distances.stream().mapToDouble(dist -> dist).sum();
