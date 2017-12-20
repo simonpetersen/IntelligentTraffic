@@ -88,8 +88,7 @@ public class DataController {
                 int endNodeId = roadNodesDao.getRoadNodes(roadNodesIds.get(i+1)).getNodeId();
                 NodeTO startNode = nodeDao.getNode(startNodeId);
                 NodeTO endNode = nodeDao.getNode(endNodeId);
-                double dist = TravelTimeCalculationUtil.calcDist(startNode.getLatitude(), startNode.getLongitude(),
-                        endNode.getLatitude(), endNode.getLongitude());
+                double dist = TravelTimeCalculationUtil.calcDist(startNode, endNode);
                 graph.edge(startNode.getNodeId(), endNode.getNodeId(), dist, !road.isOneWay());
             }
         }
@@ -204,8 +203,7 @@ public class DataController {
             NodeTO baseNode = nodeDao.getNode(roadNodes.get(i).getNodeId());
             NodeTO adjNode = nodeDao.getNode(roadNodes.get(i+1).getNodeId());
 
-            distances.add(TravelTimeCalculationUtil.calcDist(baseNode.getLatitude(), baseNode.getLongitude(), adjNode.getLatitude(),
-                    adjNode.getLongitude()));
+            distances.add(TravelTimeCalculationUtil.calcDist(baseNode, adjNode));
         }
 
         return distances.stream().mapToDouble(dist -> dist).sum();
