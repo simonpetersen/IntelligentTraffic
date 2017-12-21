@@ -15,7 +15,7 @@ import java.util.List;
 public class NodeDaoImpl implements NodeDao {
 
     private PreparedStatement insertPreparedStmt, getNodeStmt, getAllIdsStmt, getNodeByCoordinatesStmt,
-            getClosestNodeStmt, isNodeOnRoadStmt, countNodesStmt;
+            getClosestNodeStmt, isNodeOnRoadStmt, countNodesStmt, getNodeSpeedLimitStmt;
 
     public NodeDaoImpl() throws Exception {
 
@@ -41,6 +41,9 @@ public class NodeDaoImpl implements NodeDao {
 
         countNodesStmt = ConnectionFactory.getConnection()
                 .prepareStatement("SELECT COUNT(*) FROM Node");
+
+        getNodeSpeedLimitStmt = ConnectionFactory.getConnection()
+                .prepareStatement("SELECT MaxSpeed From Road INNER JOIN Road, RoadNodes WHERE RoadNodes.Road = Road.RoadId AND RoadNodes.Node = ?");
     }
 
     @Override
@@ -188,6 +191,22 @@ public class NodeDaoImpl implements NodeDao {
 
             throw new DALException("Error in query.");
         } catch (SQLException e) {
+            throw new DALException(e.getMessage());
+        }
+    }
+
+    @Override
+    public int getNodeSpeedLimit(int nodeId) throws DALException {
+        try {
+            getNodeSpeedLimitStmt.setInt(1, nodeId);
+            ResultSet resultSet = getNodeSpeedLimitStmt.executeQuery();
+
+            if(resultSet.first()){
+                return resultSet.getInt("MaxSpeed");
+            }
+            return 0;
+        }
+        catch (SQLException e){
             throw new DALException(e.getMessage());
         }
     }

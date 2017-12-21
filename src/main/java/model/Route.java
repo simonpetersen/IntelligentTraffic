@@ -11,7 +11,7 @@ import java.util.List;
 public class Route {
 
     private List<Node> node;
-    private int duration;
+    private int duration, baseDuration, distance;
 
     // Empty constructor required for XML-parsing
     public Route() {}
@@ -19,6 +19,15 @@ public class Route {
     public Route(List<Node> nodes, int duration) {
         this.node = nodes;
         this.duration = duration;
+        this.baseDuration = 0;
+        this.distance = 0;
+    }
+
+    public Route(List<Node> nodes, int duration, int baseDuration, int distance){
+        this.node = nodes;
+        this.duration = duration;
+        this.baseDuration = baseDuration;
+        this.distance = distance;
     }
 
     public List<Node> getNode() {
@@ -35,5 +44,17 @@ public class Route {
 
     public void setDuration(int duration) {
         this.duration = duration;
+    }
+
+    public int getBaseDuration(){ return baseDuration; }
+
+    public void setBaseDuration(int baseDuration) {
+        this.baseDuration = baseDuration;
+    }
+
+    public int getDistance(){ return distance; }
+
+    public void setDistance(int distance) {
+        this.distance = distance;
     }
 }

@@ -19,6 +19,7 @@ import model.Route;
 import model.dto.NodeTO;
 import model.dto.RouteCalculationParameterTO;
 import util.ParameterCategoryValues;
+import util.TravelTimeCalculationUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -78,6 +79,8 @@ public class RouteCalculationController {
         List<Node> nodeList = new ArrayList<>();
         List<EdgeIteratorState> edges = path.calcEdges();
         int duration = 0;
+        int baseDuration = 0;
+        int distance = 0;
 
         for (int i = 0; i < edges.size(); i++) {
             int baseId = edges.get(i).getBaseNode();
@@ -86,6 +89,10 @@ public class RouteCalculationController {
 
             NodeTO baseNodeTO = nodeDao.getNode(baseId);
             NodeTO adjNodeTO = nodeDao.getNode(adjId);
+
+            double tempDistance = TravelTimeCalculationUtil.calcDist(baseNodeTO, adjNodeTO);
+            distance += tempDistance;
+            baseDuration += TravelTimeCalculationUtil.calcTimeFromDist(tempDistance, nodeDao.getNodeSpeedLimit(baseId));
 
             Node baseNode = new Node(baseNodeTO.getNodeId(), baseNodeTO.getLatitude(), baseNodeTO.getLongitude());
             Node adjNode = new Node(adjNodeTO.getNodeId(), adjNodeTO.getLatitude(), adjNodeTO.getLongitude());
@@ -110,7 +117,7 @@ public class RouteCalculationController {
             nodeList.add(destinationNode);
         }
 
-        return new Route(nodeList, duration);
+        return new Route(nodeList, duration, baseDuration, distance);
     }
 
     private double getTravelTimeReductionFactor(YrWeatherDataXml yrWeatherDataXml, Date date) throws DALException {
