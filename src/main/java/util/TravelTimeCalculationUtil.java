@@ -36,9 +36,7 @@ public class TravelTimeCalculationUtil {
     }
 
     public static double calcTimeFromDist(double distance, int MaxSpeed){
-        int speed = 50;
-        if(MaxSpeed != 0)
-            speed = MaxSpeed;
-        return (distance / 1000) / (speed * 3600);
+        int speed = MaxSpeed != 0 ? MaxSpeed : 50;
+        return (distance / 1000) / speed * 3600;
     }
 }
