@@ -43,7 +43,7 @@ public class NodeDaoImpl implements NodeDao {
                 .prepareStatement("SELECT COUNT(*) FROM Node");
 
         getNodeSpeedLimitStmt = ConnectionFactory.getConnection()
-                .prepareStatement("SELECT MaxSpeed From Road INNER JOIN Road, RoadNodes WHERE RoadNodes.Road = Road.RoadId AND RoadNodes.Node = ?");
+                .prepareStatement("SELECT MaxSpeed FROM Road INNER JOIN RoadNodes WHERE RoadNodes.Road = Road.RoadId AND RoadNodes.Node = ?");
     }
 
     @Override
