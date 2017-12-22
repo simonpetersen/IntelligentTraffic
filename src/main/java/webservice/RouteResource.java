@@ -54,7 +54,8 @@ public class RouteResource {
             }
 
             try {
-                return routeCalculationController.calculateRoute(startLatitude, startLongitude, destinationLatitude, destinationLongitude, date);
+                return routeCalculationController.calculateRoute(startLatitude, startLongitude, destinationLatitude,
+                        destinationLongitude, date);
             } catch (Exception e) {
                 throw new WebServiceException(e.getMessage());
             }
