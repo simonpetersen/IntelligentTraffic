@@ -45,11 +45,12 @@ public class RouteResource {
                           @PathParam("destLat") double destinationLatitude, @PathParam("destLong") double destinationLongitude,
                           @PathParam("dateString") String dateString, @QueryParam("apiKey") String apiKey) throws WebServiceException {
         if (userController.validateApiKey(apiKey)) {
-            Date date = null;
+            Date date;
             try {
                 date = dateFormat.parse(dateString);
             } catch (ParseException e) {
                 e.printStackTrace();
+                date = new Date();
             }
 
             try {
