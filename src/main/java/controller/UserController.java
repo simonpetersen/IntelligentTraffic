@@ -90,4 +90,23 @@ public class UserController {
     public boolean validateApiKeyAdmin(String apiKey) {
         return userDao.validateApiKeyAdmin(apiKey);
     }
+
+    public Response changePassword(String username, String apiKey, String password) throws WebServiceException {
+        if(!validateApiKeyAdmin(apiKey)) {
+            throw new WebServiceException("Authorization error: User is not authorized for this operation.");
+        }
+
+        try{
+
+            if (username.equalsIgnoreCase("admin")) {
+                throw new WebServiceException("Error: Password can't be changed for this user.");
+            }
+
+            userDao.changePassword(username, password);
+        }
+        catch(DALException e){
+            throw new WebServiceException("Error while changing password: " + e.getMessage());
+        }
+        return Response.ok().build();
+    }
 }

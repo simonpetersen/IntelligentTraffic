@@ -13,7 +13,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 
 public class UserDaoImpl implements UserDao {
 
-    private PreparedStatement createUserStmt, loginStmt, deleteUserStmt, validateStmt, validateAdminStmt;
+    private PreparedStatement createUserStmt, loginStmt, deleteUserStmt, validateStmt, validateAdminStmt, changePasswordStmt;
 
     public UserDaoImpl() throws Exception {
         createUserStmt = ConnectionFactory.getConnection().prepareStatement("INSERT INTO User (Username, Password, ApiKey , Name, Admin)" +
@@ -22,6 +22,7 @@ public class UserDaoImpl implements UserDao {
         loginStmt = ConnectionFactory.getConnection().prepareStatement("SELECT * FROM User WHERE username = ? AND password = ?");
         validateStmt = ConnectionFactory.getConnection().prepareStatement("SELECT * FROM User WHERE ApiKey = ?");
         validateAdminStmt = ConnectionFactory.getConnection().prepareStatement("SELECT Admin FROM User WHERE ApiKey = ?");
+        changePasswordStmt = ConnectionFactory.getConnection().prepareStatement("UPDATE User SET password = ? WHERE username = ?");
     }
 
     @Override
@@ -105,5 +106,18 @@ public class UserDaoImpl implements UserDao {
         }
 
         return false;
+    }
+
+    @Override
+    public void changePassword(String username, String password) throws DALException{
+        try{
+            changePasswordStmt.setString(1, password);
+            changePasswordStmt.setString(2, username);
+
+            changePasswordStmt.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw new DALException(e.getMessage());
+        }
     }
 }

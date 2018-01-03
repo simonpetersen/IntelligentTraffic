@@ -54,4 +54,11 @@ public class UserResource {
         return userController.deleteUser(username, apiKey);
     }
 
+    @POST
+    @Path("changepass/{username}")
+    public Response changePassword(@PathParam("username") String username, @QueryParam("apiKey") String apiKey, @Context HttpHeaders httpHeaders) throws Exception {
+        MultivaluedMap<String, String> headers = httpHeaders.getRequestHeaders();
+        String password = headers.getFirst("password");
+        return userController.changePassword(username, apiKey, password);
+    }
 }

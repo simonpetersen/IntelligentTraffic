@@ -12,4 +12,5 @@ public interface UserDao {
     void deleteUser(String username) throws DALException;
     boolean validateApiKey(String apiKey);
     boolean validateApiKeyAdmin(String apiKey);
+    void changePassword(String username, String password) throws DALException;
 }
