@@ -18,7 +18,7 @@ import model.Node;
 import model.Route;
 import model.dto.NodeTO;
 import model.dto.RouteCalculationParameterTO;
-import model.dto.Weather;
+import model.Weather;
 import util.ParameterCategoryValues;
 import util.TravelTimeCalculationUtil;
 
