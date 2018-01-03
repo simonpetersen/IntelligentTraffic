@@ -18,6 +18,7 @@ import model.Node;
 import model.Route;
 import model.dto.NodeTO;
 import model.dto.RouteCalculationParameterTO;
+import model.dto.Weather;
 import util.ParameterCategoryValues;
 import util.TravelTimeCalculationUtil;
 
@@ -72,10 +73,12 @@ public class RouteCalculationController {
 
         Path path = dijkstra.calcPath(startRoadNode.getNodeId(), destinationRoadNode.getNodeId());
 
-        return mapPathToRoute(path, startNode, destinationNode);
+        Weather weatherInfo = getWeatherInfo(yrWeatherDataXml, date);
+
+        return mapPathToRoute(path, startNode, destinationNode, weatherInfo);
     }
 
-    private Route mapPathToRoute(Path path, NodeTO startNodeTO, NodeTO destinationNodeTO) throws DALException {
+    private Route mapPathToRoute(Path path, NodeTO startNodeTO, NodeTO destinationNodeTO, Weather weatherInfo) throws DALException {
         List<Node> nodeList = new ArrayList<>();
         List<EdgeIteratorState> edges = path.calcEdges();
         int duration = 0;
@@ -117,7 +120,7 @@ public class RouteCalculationController {
             nodeList.add(destinationNode);
         }
 
-        return new Route(nodeList, duration, baseDuration, distance);
+        return new Route(nodeList, duration, baseDuration, distance, weatherInfo);
     }
 
     private double getTravelTimeReductionFactor(YrWeatherDataXml yrWeatherDataXml, Date date) throws DALException {
@@ -157,5 +160,19 @@ public class RouteCalculationController {
         }
 
         return null;
+    }
+
+    private Weather getWeatherInfo(YrWeatherDataXml yrWeatherDataXml, Date date){
+        TimeElement timeElement = getTimeElement(yrWeatherDataXml, date);
+        Weather weatherInfo = new Weather(0.0,0.0,0.0,"");
+        if(timeElement != null) {
+            double precipitationValue = timeElement.getPrecipitationElement().getPrecipitationValue();
+            double temperatureValue = timeElement.getTemperatureElement().getValue();
+            double windValue = timeElement.getWindSpeedElement().getMps();
+            String windDirection = timeElement.getWindDirectionElement().getCode();
+
+            weatherInfo = new Weather(windValue, precipitationValue, temperatureValue, windDirection);
+        }
+        return weatherInfo;
     }
 }
