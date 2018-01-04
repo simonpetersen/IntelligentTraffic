@@ -10,7 +10,7 @@ public class Route {
 
     private List<Node> node;
     private int duration, baseDuration, distance;
-    private double temperature, precipitation, windSpeed;
+    private double temperature, precipitation, windSpeed, traveltimeReductionFactor;
     private String windDirection;
 
     // Empty constructor required for XML-parsing
@@ -30,7 +30,7 @@ public class Route {
         this.distance = distance;
     }
 
-    public Route(List<Node> nodes, int duration, int baseDuration, int distance, Weather weather){
+    public Route(List<Node> nodes, int duration, int baseDuration, int distance, Weather weather, double traveltimeReductionFactor){
         this.node = nodes;
         this.duration = duration;
         this.baseDuration = baseDuration;
@@ -39,6 +39,7 @@ public class Route {
         this.temperature = weather.getTemperature();
         this.windSpeed = weather.getWindSpeed();
         this.windDirection = weather.getWindDirection();
+        this.traveltimeReductionFactor = traveltimeReductionFactor;
     }
 
     public List<Node> getNode() {
@@ -85,6 +86,10 @@ public class Route {
         this.precipitation = precipitation;
     }
 
+    public void setTraveltimeReductionFactor(double traveltimeReductionFactor) {
+        this.traveltimeReductionFactor = traveltimeReductionFactor;
+    }
+
     public String getWindDirection() {
         return windDirection;
     }
@@ -99,5 +104,9 @@ public class Route {
 
     public double getWindSpeed() {
         return windSpeed;
+    }
+
+    public double getTraveltimeReductionFactor() {
+        return traveltimeReductionFactor;
     }
 }

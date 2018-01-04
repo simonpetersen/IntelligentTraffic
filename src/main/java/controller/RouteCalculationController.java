@@ -65,6 +65,8 @@ public class RouteCalculationController {
 
         YrWeatherDataXml yrWeatherDataXml = yrWeatherDataConnector.getWeatherData();
         double travelTimeReductionFactor = getTravelTimeReductionFactor(yrWeatherDataXml, date);
+        Weather weatherInfo = getWeatherInfo(yrWeatherDataXml, date);
+
         FlagEncoder encoder = new CarFlagEncoder();
         GraphHopperStorage graph = dataController.loadMapAsGraph(encoder, travelTimeReductionFactor);
 
@@ -73,12 +75,12 @@ public class RouteCalculationController {
 
         Path path = dijkstra.calcPath(startRoadNode.getNodeId(), destinationRoadNode.getNodeId());
 
-        Weather weatherInfo = getWeatherInfo(yrWeatherDataXml, date);
 
-        return mapPathToRoute(path, startNode, destinationNode, weatherInfo);
+
+        return mapPathToRoute(path, startNode, destinationNode, weatherInfo, travelTimeReductionFactor);
     }
 
-    private Route mapPathToRoute(Path path, NodeTO startNodeTO, NodeTO destinationNodeTO, Weather weatherInfo) throws DALException {
+    private Route mapPathToRoute(Path path, NodeTO startNodeTO, NodeTO destinationNodeTO, Weather weatherInfo, double travelTimeReductionFactor) throws DALException {
         List<Node> nodeList = new ArrayList<>();
         List<EdgeIteratorState> edges = path.calcEdges();
         int duration = 0;
@@ -120,7 +122,7 @@ public class RouteCalculationController {
             nodeList.add(destinationNode);
         }
 
-        return new Route(nodeList, duration, baseDuration, distance, weatherInfo);
+        return new Route(nodeList, duration, baseDuration, distance, weatherInfo, travelTimeReductionFactor);
     }
 
     private double getTravelTimeReductionFactor(YrWeatherDataXml yrWeatherDataXml, Date date) throws DALException {
@@ -154,7 +156,7 @@ public class RouteCalculationController {
 
     private TimeElement getTimeElement(YrWeatherDataXml yrWeatherDataXml, Date dateTime) {
         for (TimeElement timeElement : yrWeatherDataXml.getForecastElement().getTabularElement().getTimeElements()) {
-            if (timeElement.getFrom().before(dateTime) && timeElement.getTo().after(dateTime)) {
+            if (timeElement.getFrom().before(dateTime) && timeElement.getTo().after(dateTime) || timeElement.getTo().equals(dateTime)) {
                 return timeElement;
             }
         }
@@ -164,7 +166,7 @@ public class RouteCalculationController {
 
     private Weather getWeatherInfo(YrWeatherDataXml yrWeatherDataXml, Date date){
         TimeElement timeElement = getTimeElement(yrWeatherDataXml, date);
-        Weather weatherInfo = new Weather(0.0,0.0,0.0,"");
+        Weather weatherInfo = new Weather(-1.0,-1.0,0.0,"null");
         if(timeElement != null) {
             double precipitationValue = timeElement.getPrecipitationElement().getPrecipitationValue();
             double temperatureValue = timeElement.getTemperatureElement().getValue();
